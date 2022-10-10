@@ -8,3 +8,8 @@ edition = "2021"
 [dependencies]
 actix-web = "4.2.1"
 mongodb = "2.3.1"
+diesel = { version = "2.0.0", features = ["postgres", "r2d2", "chrono"] }
+dotenvy = "0.15.5"
+r2d2 = "0.8.10"
+serde = "1.0.145"
+chrono = { version = "0.4.22", features=["serde"] }

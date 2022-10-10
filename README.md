@@ -1,7 +1,9 @@
 # review-api
 
-an attempt to create backend for movielo in rust
+an attempt to create backend for movielo? or something similar
 
 ## starting template
 
-https://github.com/actix/examples/tree/master/databases/mongodb
+https://auth0.com/blog/build-an-api-in-rust-with-jwt-authentication-using-actix-web/
+
+https://gill.net.in/posts/auth-microservice-rust-actix-web1.0-diesel-complete-tutorial/#setting-up-diesel-and-creating-our-user-model

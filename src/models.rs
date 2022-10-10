@@ -1,48 +1,21 @@
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-pub struct Content {
-    title: String,
-    img_url: String,
-    content_url: String,
+use crate::schema::*;
+use diesel::prelude::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize, Queryable)]
+pub struct User {
+    pub id: i32,
+    pub first_name: String,
+    pub last_name: String,
+    pub email: String,
+    pub created_at: chrono::NaiveDateTime,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-pub struct Review {
-    content: String,
-    ratings: Vec<Rating>,
-}
-
-struct Select {
-    title: String,
-    options: Vec<String>,
-    value: String,
-}
-
-struct Score {
-    title: String,
-    min: f64,
-    max: f64,
-    value: f64,
-}
-
-struct Text {
-    title: String,
-    value: String,
-}
-
-struct Number {
-    title: String,
-    value: i64,
-}
-
-struct Toggle {
-    title: String,
-    value: bool,
-}
-
-enum Rating {
-    Select(Select),
-    Score(Score),
-    Text(Text),
-    Number(Number),
-    Toggle(Toggle),
+#[derive(Debug, Insertable)]
+#[table_name = "users"]
+pub struct NewUser<'a> {
+    pub first_name: &'a str,
+    pub last_name: &'a str,
+    pub email: &'a str,
+    pub created_at: chrono::NaiveDateTime,
 }

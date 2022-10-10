@@ -1,17 +1,30 @@
+#[macro_use]
+extern crate diesel;
+
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use mongodb::Client;
+use diesel::prelude::*;
+use diesel::r2d2::{self, ConnectionManager};
+
+mod models;
+mod schema;
+
+// pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".into());
+    dotenvy::dotenv().ok();
+    std::env::set_var("RUST_LOG", "actix_web=debug");
+    let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is missing");
 
-    let client = Client::with_uri_str(uri)
-        .await
-        .expect("failed connecting to mongodb");
+    let manager = ConnectionManager::<PgConnection>::new(db_url);
+
+    let pool = r2d2::Pool::builder()
+        .build(manager)
+        .expect("Failed to build pool");
 
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(client.clone()))
+            .app_data(web::Data::new(pool.clone()))
             .service(hello)
     })
     .bind(("127.0.0.1", 8080))?
