@@ -1,5 +1,4 @@
 use crate::schema::*;
-use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Queryable)]
