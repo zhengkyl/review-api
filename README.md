@@ -1,8 +1,8 @@
 # review-api
 
-an attempt to create backend for movielo? or something similar
+an attempt to learn how to use rust for a web server
 
-## starting template
+## based on following examples
 
 https://auth0.com/blog/build-an-api-in-rust-with-jwt-authentication-using-actix-web/
 

@@ -33,7 +33,14 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .service(hello)
-            .service(web::scope("/users").service(users::get_users))
+            .service(
+                web::scope("/users")
+                    .service(users::get_users)
+                    .service(users::get_users_id)
+                    .service(users::delete_users_id)
+                    .service(users::put_users_id)
+                    .service(users::post_users),
+            )
     })
     .bind(("127.0.0.1", 8080))?
     .run()
