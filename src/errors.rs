@@ -36,3 +36,15 @@ impl ResponseError for ServiceError {
             .body(self.to_string())
     }
 }
+
+impl From<r2d2::Error> for ServiceError {
+    fn from(_: r2d2::Error) -> Self {
+        ServiceError::InternalServerError
+    }
+}
+
+impl From<diesel::result::Error> for ServiceError {
+    fn from(_: diesel::result::Error) -> Self {
+        ServiceError::InternalServerError
+    }
+}

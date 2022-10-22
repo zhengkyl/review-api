@@ -6,6 +6,7 @@ diesel::table! {
         first_name -> Text,
         last_name -> Text,
         email -> Text,
+        hash -> Text,
         created_at -> Timestamp,
     }
 }
