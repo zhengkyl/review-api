@@ -13,10 +13,11 @@ pub struct User {
 }
 
 #[derive(Debug, Insertable)]
-#[table_name = "users"]
+#[diesel(table_name = users)]
 pub struct NewUser<'a> {
     pub first_name: &'a str,
     pub last_name: &'a str,
     pub email: &'a str,
+    pub hash: &'a str,
     pub created_at: chrono::NaiveDateTime,
 }

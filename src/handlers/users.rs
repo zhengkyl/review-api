@@ -1,9 +1,9 @@
 use diesel::QueryDsl;
 use serde::{Deserialize, Serialize};
 
-use crate::constants::CONNECTION_POOL_ERROR;
 use crate::diesel::RunQueryDsl;
 use crate::PooledConn;
+use crate::{constants::CONNECTION_POOL_ERROR, utils::hash_password};
 
 use crate::errors::ServiceError;
 use crate::Pool;
@@ -21,6 +21,7 @@ pub struct InputUser {
     pub first_name: String,
     pub last_name: String,
     pub email: String,
+    pub password: String,
 }
 #[derive(Debug, Serialize, Deserialize, AsChangeset)]
 #[diesel(table_name = users)]
@@ -30,7 +31,7 @@ pub struct UpdateUser {
     pub email: Option<String>,
 }
 
-#[get("/")]
+#[get("")]
 pub async fn get_users(pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
     let mut conn = pool.get().expect(CONNECTION_POOL_ERROR);
     let users = web::block(move || get_all_users(&mut conn)).await??;
@@ -38,7 +39,7 @@ pub async fn get_users(pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json(users))
 }
 
-#[get("/{id}")]
+#[get("{id}")]
 pub async fn get_users_id(
     pool: web::Data<Pool>,
     id: web::Path<i32>,
@@ -49,7 +50,7 @@ pub async fn get_users_id(
     Ok(HttpResponse::Ok().json(users))
 }
 
-#[put("/{id}")]
+#[put("{id}")]
 pub async fn put_users_id(
     pool: web::Data<Pool>,
     id: web::Path<i32>,
@@ -63,7 +64,7 @@ pub async fn put_users_id(
     Ok(HttpResponse::Ok().json(user))
 }
 
-#[delete("/{id}")]
+#[delete("{id}")]
 pub async fn delete_users_id(
     pool: web::Data<Pool>,
     id: web::Path<i32>,
@@ -77,7 +78,7 @@ pub async fn delete_users_id(
         .unwrap())
 }
 
-#[post("/")]
+#[post("")]
 pub async fn post_users(
     pool: web::Data<Pool>,
     user: web::Json<InputUser>,
@@ -102,7 +103,7 @@ fn get_user_by_id(conn: &mut PooledConn, idx: i32) -> Result<User, ServiceError>
     users
         .find(idx)
         .get_result(conn)
-        .map_err(|_| ServiceError::InternalServerError)
+        .map_err(|_| ServiceError::BadRequest("User not found".into()))
         .and_then(|result| Ok(result))
 }
 
@@ -115,12 +116,15 @@ fn delete_user_by_id(conn: &mut PooledConn, idx: i32) -> Result<usize, ServiceEr
 }
 
 fn create_user(conn: &mut PooledConn, user: web::Json<InputUser>) -> Result<User, ServiceError> {
-    use crate::schema::users::dsl::*;
+    use crate::schema::users::dsl::users;
+
+    let hash = &hash_password(&user.password)?;
 
     let new_user = NewUser {
         first_name: &user.first_name,
         last_name: &user.last_name,
         email: &user.email,
+        hash,
         created_at: chrono::Local::now().naive_local(),
     };
 

@@ -21,5 +21,5 @@ pub fn hash_password(password: &str) -> Result<String, ServiceError> {
 
 pub fn verify_password(password: &str, hash: &str) -> Result<bool, ServiceError> {
     argon2::verify_encoded_ext(hash, password.as_bytes(), SECRET_KEY.as_bytes(), &[])
-        .map_err(|_| ServiceError::Unauthorized)
+        .map_err(|_| ServiceError::InternalServerError)
 }
