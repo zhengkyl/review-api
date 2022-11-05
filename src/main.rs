@@ -21,7 +21,7 @@ mod utils;
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 pub type PooledConn = PooledConnection<ConnectionManager<PgConnection>>;
 
-use handlers::{auth, users};
+use handlers::{auth, search, users};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -65,6 +65,11 @@ async fn main() -> std::io::Result<()> {
                     .service(users::delete_users_id)
                     .service(users::put_users_id)
                     .service(users::post_users),
+            )
+            .service(
+                web::scope("/search")
+                    .service(search::search_movies)
+                    .service(search::search_shows),
             )
     })
     .bind(("127.0.0.1", 8080))?

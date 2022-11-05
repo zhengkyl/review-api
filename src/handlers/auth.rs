@@ -4,7 +4,6 @@ use crate::constants::CONNECTION_POOL_ERROR;
 use crate::diesel::ExpressionMethods;
 use crate::{errors::ServiceError, models::User, utils::verify_password, Pool, PooledConn};
 use actix_identity::Identity;
-use actix_session::Session;
 use actix_web::{
     delete, get, post, web, FromRequest, HttpMessage, HttpRequest, HttpResponse, Responder,
 };

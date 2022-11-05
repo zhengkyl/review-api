@@ -4,6 +4,8 @@ use actix_web::{
     http::{header::ContentType, StatusCode},
     HttpResponse, ResponseError,
 };
+use awc::error::{JsonPayloadError, SendRequestError};
+
 #[derive(Debug)]
 pub enum ServiceError {
     InternalServerError,
@@ -39,6 +41,17 @@ impl ResponseError for ServiceError {
 
 impl From<r2d2::Error> for ServiceError {
     fn from(_: r2d2::Error) -> Self {
+        ServiceError::InternalServerError
+    }
+}
+
+impl From<SendRequestError> for ServiceError {
+    fn from(_: SendRequestError) -> Self {
+        ServiceError::InternalServerError
+    }
+}
+impl From<JsonPayloadError> for ServiceError {
+    fn from(_: JsonPayloadError) -> Self {
         ServiceError::InternalServerError
     }
 }
