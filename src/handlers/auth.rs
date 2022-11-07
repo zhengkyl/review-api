@@ -15,8 +15,19 @@ pub struct AuthData {
     pub password: String,
 }
 
-#[derive(Debug, Serialize)]
-pub struct UserId(String);
+#[derive(Debug, Serialize, Clone, Copy)]
+pub struct UserId(i32);
+
+impl From<i32> for UserId {
+    fn from(n: i32) -> Self {
+        UserId(n)
+    }
+}
+impl From<UserId> for i32 {
+    fn from(user_id: UserId) -> Self {
+        user_id.0
+    }
+}
 
 impl FromRequest for UserId {
     type Error = actix_web::Error;
@@ -30,7 +41,7 @@ impl FromRequest for UserId {
         // don't accidently add stuff after the cookie like i did
         // dbg!(req.cookie("id"));
         if let Ok(identity) = Identity::from_request(req, payload).into_inner() {
-            let user_id = identity.id().unwrap();
+            let user_id = identity.id().unwrap().parse::<i32>().unwrap();
 
             return future::ready(Ok(UserId(user_id)));
         }
@@ -64,7 +75,6 @@ pub async fn login(
 
 #[get("")]
 pub async fn me(user_id: UserId) -> impl Responder {
-    dbg!(&user_id);
     HttpResponse::Ok().json(user_id)
 }
 

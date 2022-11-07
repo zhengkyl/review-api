@@ -1,11 +1,20 @@
 // @generated automatically by Diesel CLI.
 
+pub mod sql_types {
+    #[derive(diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "watch_status"))]
+    pub struct WatchStatus;
+}
+
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::WatchStatus;
+
     film_reviews (id) {
         id -> Int4,
         tmdb_id -> Int4,
         user_id -> Int4,
-        status -> Text,
+        status -> WatchStatus,
         text -> Text,
         fun_before -> Bool,
         fun_during -> Bool,
@@ -15,11 +24,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::WatchStatus;
+
     show_reviews (id) {
         id -> Int4,
         tmdb_id -> Int4,
         user_id -> Int4,
-        status -> Text,
+        status -> WatchStatus,
         text -> Text,
         fun_before -> Bool,
         fun_during -> Bool,

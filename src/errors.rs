@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use actix_web::{
+    error::BlockingError,
     http::{header::ContentType, StatusCode},
     HttpResponse, ResponseError,
 };
@@ -36,6 +37,12 @@ impl ResponseError for ServiceError {
         HttpResponse::build(self.status_code())
             .insert_header(ContentType::html())
             .body(self.to_string())
+    }
+}
+
+impl From<BlockingError> for ServiceError {
+    fn from(_: BlockingError) -> Self {
+        ServiceError::InternalServerError
     }
 }
 

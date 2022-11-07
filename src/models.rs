@@ -1,4 +1,4 @@
-use crate::{handlers::review::WatchStatus, schema::*};
+use crate::{handlers::reviews::WatchStatus, schema::*};
 use diesel::associations::Associations;
 use serde::{Deserialize, Serialize};
 
