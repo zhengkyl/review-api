@@ -15,11 +15,10 @@ diesel::table! {
     use super::sql_types::MediaCategory;
     use super::sql_types::WatchStatus;
 
-    reviews (id) {
-        id -> Int4,
-        category -> MediaCategory,
-        tmdb_id -> Int4,
+    reviews (user_id, tmdb_id, category) {
         user_id -> Int4,
+        tmdb_id -> Int4,
+        category -> MediaCategory,
         status -> WatchStatus,
         text -> Text,
         fun_before -> Bool,

@@ -27,12 +27,12 @@ pub struct NewUser<'a> {
 }
 
 #[derive(Debug, Serialize, Deserialize, Queryable, Identifiable, Associations)]
+#[diesel(primary_key(user_id, tmdb_id, category))]
 #[diesel(belongs_to(User))]
 pub struct Review {
-    pub id: i32,
-    pub category: MediaCategory,
-    pub tmdb_id: i32,
     pub user_id: i32,
+    pub tmdb_id: i32,
+    pub category: MediaCategory,
     pub status: WatchStatus,
     pub text: String,
     pub fun_before: bool,
@@ -53,4 +53,10 @@ pub struct NewReview<'a> {
     pub fun_during: bool,
     pub fun_after: bool,
     pub updated_at: chrono::NaiveDateTime,
+}
+
+pub struct ApiKey {
+    pub key: String,
+    pub user_id: i32,
+    // pub permissions: ,
 }

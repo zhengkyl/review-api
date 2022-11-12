@@ -13,7 +13,7 @@ use crate::{
     Pool, PooledConn,
 };
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, DbEnum)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, DbEnum, Eq, PartialEq, Hash)]
 #[DieselTypePath = "crate::schema::sql_types::WatchStatus"]
 #[DbValueStyle = "PascalCase"]
 pub enum WatchStatus {
@@ -23,12 +23,24 @@ pub enum WatchStatus {
     PlanToWatch,
 }
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, DbEnum)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, DbEnum, Eq, PartialEq, Hash)]
 #[DieselTypePath = "crate::schema::sql_types::MediaCategory"]
 #[DbValueStyle = "PascalCase"]
 pub enum MediaCategory {
     Film,
     Show,
+}
+
+impl TryFrom<String> for MediaCategory {
+    type Error = &'static str;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "Film" => Ok(MediaCategory::Film),
+            "Show" => Ok(MediaCategory::Show),
+            _ => Err("Unrecognized MediaCategory"),
+        }
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -81,16 +93,24 @@ pub async fn post_reviews(
     Ok(HttpResponse::Ok().json(review))
 }
 
-#[put("/{id}")]
+#[put("/{category}/{id}")]
 pub async fn put_reviews_id(
     pool: web::Data<Pool>,
     user_id: UserId,
-    id: web::Path<i32>,
+    path: web::Path<(String, i32)>,
     item: web::Json<EditReview>,
 ) -> Result<HttpResponse, ServiceError> {
+    let (category, tmdb_id) = path.into_inner();
+
+    let category = MediaCategory::try_from(category);
+
+    let Ok(category) = category else {
+        return Err(ServiceError::BadRequest("Unrecognized media category".to_string()));
+    };
+
     let mut conn = pool.get().expect(CONNECTION_POOL_ERROR);
     let review =
-        web::block(move || edit_review(&mut conn, user_id, id.into_inner(), item.into_inner()))
+        web::block(move || edit_review(&mut conn, user_id, tmdb_id, category, item.into_inner()))
             .await??;
     Ok(HttpResponse::Ok().json(review))
 }
@@ -120,13 +140,15 @@ fn edit_review(
     conn: &mut PooledConn,
     req_id: UserId,
     idx: i32,
+    cat: MediaCategory,
     edits: EditReview,
 ) -> Result<Review, ServiceError> {
     use crate::schema::reviews::dsl::*;
     let res = diesel::update(
         reviews
-            .filter(id.eq(idx))
-            .filter(user_id.eq(i32::from(req_id))),
+            .filter(user_id.eq(i32::from(req_id)))
+            .filter(tmdb_id.eq(idx))
+            .filter(category.eq(cat)),
     )
     .set(edits)
     .get_result::<Review>(conn);
