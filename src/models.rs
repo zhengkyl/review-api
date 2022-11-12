@@ -1,4 +1,7 @@
-use crate::{handlers::reviews::WatchStatus, schema::*};
+use crate::{
+    handlers::reviews::{MediaCategory, WatchStatus},
+    schema::*,
+};
 use diesel::associations::Associations;
 use serde::{Deserialize, Serialize};
 
@@ -24,9 +27,10 @@ pub struct NewUser<'a> {
 }
 
 #[derive(Debug, Serialize, Deserialize, Queryable, Identifiable, Associations)]
-#[belongs_to(User)]
-pub struct FilmReview {
+#[diesel(belongs_to(User))]
+pub struct Review {
     pub id: i32,
+    pub category: MediaCategory,
     pub tmdb_id: i32,
     pub user_id: i32,
     pub status: WatchStatus,
@@ -38,35 +42,9 @@ pub struct FilmReview {
 }
 
 #[derive(Debug, Insertable)]
-#[diesel(table_name = film_reviews)]
-pub struct NewFilmReview<'a> {
-    pub tmdb_id: i32,
-    pub user_id: i32,
-    pub status: WatchStatus,
-    pub text: &'a str,
-    pub fun_before: bool,
-    pub fun_during: bool,
-    pub fun_after: bool,
-    pub updated_at: chrono::NaiveDateTime,
-}
-
-#[derive(Debug, Serialize, Deserialize, Queryable, Identifiable, Associations)]
-#[belongs_to(User)]
-pub struct ShowReview {
-    pub id: i32,
-    pub tmdb_id: i32,
-    pub user_id: i32,
-    pub status: WatchStatus,
-    pub text: String,
-    pub fun_before: bool,
-    pub fun_during: bool,
-    pub fun_after: bool,
-    pub updated_at: chrono::NaiveDateTime,
-}
-
-#[derive(Debug, Insertable)]
-#[diesel(table_name = show_reviews)]
-pub struct NewShowReview<'a> {
+#[diesel(table_name = reviews)]
+pub struct NewReview<'a> {
+    pub category: MediaCategory,
     pub tmdb_id: i32,
     pub user_id: i32,
     pub status: WatchStatus,

@@ -8,7 +8,8 @@ use crate::{
     diesel::{ExpressionMethods, RunQueryDsl},
     errors::ServiceError,
     handlers::auth::UserId,
-    models::{FilmReview, NewFilmReview},
+    models::{NewReview, Review},
+    schema::reviews,
     Pool, PooledConn,
 };
 
@@ -22,15 +23,24 @@ pub enum WatchStatus {
     PlanToWatch,
 }
 
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, DbEnum)]
+#[DieselTypePath = "crate::schema::sql_types::MediaCategory"]
+#[DbValueStyle = "PascalCase"]
+pub enum MediaCategory {
+    Film,
+    Show,
+}
+
 #[derive(Deserialize, Debug)]
 pub struct InputReview {
     tmdb_id: i32,
+    category: MediaCategory,
     status: WatchStatus,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Serialize, Deserialize, AsChangeset)]
+#[diesel(table_name = reviews)]
 pub struct EditReview {
-    tmdb_id: i32,
     status: Option<WatchStatus>,
     text: Option<String>,
     fun_before: Option<bool>,
@@ -38,25 +48,26 @@ pub struct EditReview {
     fun_after: Option<bool>,
 }
 
-#[get("/films")]
-pub async fn get_film_reviews(
+#[get("")]
+pub async fn get_reviews(
     pool: web::Data<Pool>,
     user_id: UserId,
 ) -> Result<HttpResponse, ServiceError> {
     let mut conn = pool.get().expect(CONNECTION_POOL_ERROR);
-    let reviews = web::block(move || get_all_film_reviews(&mut conn, user_id)).await??;
+    let reviews = web::block(move || get_all_reviews(&mut conn, user_id)).await??;
 
     Ok(HttpResponse::Ok().json(reviews))
 }
 
-#[post("/films")]
-pub async fn review_film(
+#[post("")]
+pub async fn post_reviews(
     pool: web::Data<Pool>,
     user_id: UserId,
     item: web::Json<InputReview>,
 ) -> Result<HttpResponse, ServiceError> {
     let mut conn = pool.get().expect(CONNECTION_POOL_ERROR);
-    let new_film_review = NewFilmReview {
+    let new_film_review = NewReview {
+        category: item.category,
         tmdb_id: item.tmdb_id,
         status: item.status,
         user_id: i32::from(user_id),
@@ -66,49 +77,60 @@ pub async fn review_film(
         fun_after: false,
         updated_at: chrono::Local::now().naive_local(),
     };
-    let review = web::block(move || create_film_review(&mut conn, new_film_review)).await??;
+    let review = web::block(move || create_review(&mut conn, new_film_review)).await??;
     Ok(HttpResponse::Ok().json(review))
 }
 
-fn get_all_film_reviews(
-    conn: &mut PooledConn,
-    req_id: UserId,
-) -> Result<Vec<FilmReview>, ServiceError> {
-    use crate::schema::film_reviews::dsl::*;
+#[put("/{id}")]
+pub async fn put_reviews_id(
+    pool: web::Data<Pool>,
+    user_id: UserId,
+    id: web::Path<i32>,
+    item: web::Json<EditReview>,
+) -> Result<HttpResponse, ServiceError> {
+    let mut conn = pool.get().expect(CONNECTION_POOL_ERROR);
+    let review =
+        web::block(move || edit_review(&mut conn, user_id, id.into_inner(), item.into_inner()))
+            .await??;
+    Ok(HttpResponse::Ok().json(review))
+}
 
-    film_reviews
+fn get_all_reviews(conn: &mut PooledConn, req_id: UserId) -> Result<Vec<Review>, ServiceError> {
+    use crate::schema::reviews::dsl::*;
+
+    reviews
         .filter(user_id.eq(i32::from(req_id)))
-        .load::<FilmReview>(conn)
+        .load::<Review>(conn)
         .map_err(|_| ServiceError::InternalServerError)
         .and_then(|result| Ok(result))
 }
 
-fn create_film_review(
-    conn: &mut PooledConn,
-    review: NewFilmReview,
-) -> Result<FilmReview, ServiceError> {
-    use crate::schema::film_reviews::dsl::*;
+fn create_review(conn: &mut PooledConn, review: NewReview) -> Result<Review, ServiceError> {
+    use crate::schema::reviews::dsl::*;
 
-    let res = diesel::insert_into(film_reviews)
+    let res = diesel::insert_into(reviews)
         .values(review)
-        .get_result::<FilmReview>(conn);
+        .get_result::<Review>(conn);
 
     res.map_err(|e| ServiceError::BadRequest(format!("{}", e)))
         .and_then(|result| Ok(result))
 }
 
-// #[put("/films")]
-// pub async fn review_film(
-//     user: Option<Identity>,
-//     item: web::Json<EditReview>,
-// ) -> Result<HttpResponse, ServiceError> {
-//     Ok(HttpResponse::Ok().finish())
-// }
+fn edit_review(
+    conn: &mut PooledConn,
+    req_id: UserId,
+    idx: i32,
+    edits: EditReview,
+) -> Result<Review, ServiceError> {
+    use crate::schema::reviews::dsl::*;
+    let res = diesel::update(
+        reviews
+            .filter(id.eq(idx))
+            .filter(user_id.eq(i32::from(req_id))),
+    )
+    .set(edits)
+    .get_result::<Review>(conn);
 
-// #[put("/shows")]
-// pub async fn review_show(
-//     user: Option<Identity>,
-//     item: web::Json<InputReview>,
-// ) -> Result<HttpResponse, ServiceError> {
-//     Ok(HttpResponse::Ok().finish())
-// }
+    res.map_err(|_| ServiceError::InternalServerError)
+        .and_then(|result| Ok(result))
+}

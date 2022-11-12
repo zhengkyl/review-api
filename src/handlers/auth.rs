@@ -66,9 +66,7 @@ pub async fn login(
 
     let user = web::block(move || query_user(auth_data.into_inner(), &mut conn)).await??;
 
-    // let user = serde_json::to_string(&user)?;
-
-    let t = Identity::login(&request.extensions(), user.id.to_string()).unwrap();
+    Identity::login(&request.extensions(), user.id.to_string()).unwrap();
 
     Ok(HttpResponse::Ok().finish())
 }

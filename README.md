@@ -6,7 +6,7 @@ Checklist
 
 - [x] user auth
 - [x] search movies and shows using TMDB api
-- [ ] add and edit reviews for movies and shows
+- [x] add and edit reviews for movies and shows
 - [ ] allow programmatic access to api
   - [ ] create public only endpoints
   - [ ] renegerate api keys for users

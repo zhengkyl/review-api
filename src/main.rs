@@ -73,8 +73,9 @@ async fn main() -> std::io::Result<()> {
             )
             .service(
                 web::scope("/reviews")
-                    .service(reviews::get_film_reviews)
-                    .service(reviews::review_film),
+                    .service(reviews::get_reviews)
+                    .service(reviews::post_reviews)
+                    .service(reviews::put_reviews_id),
             )
     })
     .bind(("127.0.0.1", 8080))?

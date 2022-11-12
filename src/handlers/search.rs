@@ -54,7 +54,7 @@ pub struct Results<T> {
     total_pages: i32,
 }
 
-#[get("/movies")]
+#[get("/films")]
 pub async fn search_movies(info: web::Query<SearchInfo>) -> Result<HttpResponse, ServiceError> {
     let client = awc::Client::default();
 
