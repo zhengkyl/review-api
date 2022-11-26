@@ -8,13 +8,14 @@ lazy_static::lazy_static! {
   pub static ref TMDB_API_KEY: String = std::env::var("TMDB_API_KEY").unwrap();
 }
 
-const SEARCH_MOVIE_BASE: &str = "https://api.themoviedb.org/3/search/movie?api_key=";
-const SEARCH_SHOW_BASE: &str = "https://api.themoviedb.org/3/search/tv?api_key=";
-const QUERY_PARAM: &str = "&query=";
-const PAGE_PARAM: &str = "&page=";
-const LANG_PARAM: &str = "&language=";
-const SHOW_YEAR_PARAM: &str = "&year="; // primary_release_year is an alternative?
-const MOVIE_YEAR_PARAM: &str = "&first_air_date_year=";
+const SEARCH_FILM_BASE: &str = "https://api.themoviedb.org/3/search/movie?";
+const SEARCH_SHOW_BASE: &str = "https://api.themoviedb.org/3/search/tv?";
+const API_PARAM: &str = "api_key";
+const QUERY_PARAM: &str = "query";
+const PAGE_PARAM: &str = "page";
+const LANG_PARAM: &str = "language";
+const FILM_YEAR_PARAM: &str = "year"; // primary_release_year is an alternative?
+const SHOW_YEAR_PARAM: &str = "first_air_date_year";
 
 #[derive(Deserialize)]
 pub struct SearchInfo {
@@ -58,22 +59,26 @@ pub struct Results<T> {
 pub async fn search_movies(info: web::Query<SearchInfo>) -> Result<HttpResponse, ServiceError> {
     let client = awc::Client::default();
 
-    let mut url = SEARCH_MOVIE_BASE.to_owned() + &TMDB_API_KEY + QUERY_PARAM + &info.query;
+    let mut params = vec![
+        (API_PARAM, TMDB_API_KEY.to_string()),
+        (QUERY_PARAM, info.query.to_string()),
+    ];
 
     if let Some(page) = &info.page {
-        url += PAGE_PARAM;
-        url += &page.to_string();
+        params.push((PAGE_PARAM, page.to_string()));
     }
     if let Some(lang) = &info.lang {
-        url += LANG_PARAM;
-        url += lang;
+        params.push((LANG_PARAM, lang.to_string()));
     }
     if let Some(year) = &info.year {
-        url += MOVIE_YEAR_PARAM;
-        url += &year.to_string();
+        params.push((FILM_YEAR_PARAM, year.to_string()));
     }
 
-    let req = client.get(url);
+    let Ok(path_query) = serde_urlencoded::to_string(params) else {
+        return Err(ServiceError::BadRequest("Invalid search params".into()));
+    };
+
+    let req = client.get(SEARCH_FILM_BASE.to_owned() + &path_query);
 
     let mut res = req.send().await?;
 
@@ -86,22 +91,26 @@ pub async fn search_movies(info: web::Query<SearchInfo>) -> Result<HttpResponse,
 pub async fn search_shows(info: web::Query<SearchInfo>) -> Result<HttpResponse, ServiceError> {
     let client = awc::Client::default();
 
-    let mut url = SEARCH_SHOW_BASE.to_owned() + &TMDB_API_KEY + QUERY_PARAM + &info.query;
+    let mut params = vec![
+        (API_PARAM, TMDB_API_KEY.to_string()),
+        (QUERY_PARAM, info.query.to_string()),
+    ];
 
     if let Some(page) = &info.page {
-        url += PAGE_PARAM;
-        url += &page.to_string();
+        params.push((PAGE_PARAM, page.to_string()));
     }
     if let Some(lang) = &info.lang {
-        url += LANG_PARAM;
-        url += &lang;
+        params.push((LANG_PARAM, lang.to_string()));
     }
     if let Some(year) = &info.year {
-        url += SHOW_YEAR_PARAM;
-        url += &year.to_string();
+        params.push((SHOW_YEAR_PARAM, year.to_string()));
     }
 
-    let req = client.get(url);
+    let Ok(path_query) = serde_urlencoded::to_string(params) else {
+        return Err(ServiceError::BadRequest("Invalid search params".into()));
+    };
+
+    let req = client.get(SEARCH_SHOW_BASE.to_owned() + &path_query);
 
     let mut res = req.send().await?;
 
