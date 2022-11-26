@@ -37,9 +37,6 @@ impl FromRequest for UserId {
         req: &actix_web::HttpRequest,
         payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        // make sure to check cookie is parsed correctly
-        // don't accidently add stuff after the cookie like i did
-        // dbg!(req.cookie("id"));
         if let Ok(identity) = Identity::from_request(req, payload).into_inner() {
             let user_id = identity.id().unwrap().parse::<i32>().unwrap();
 

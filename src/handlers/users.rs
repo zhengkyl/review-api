@@ -2,6 +2,7 @@ use diesel::QueryDsl;
 use serde::{Deserialize, Serialize};
 
 use crate::diesel::RunQueryDsl;
+use crate::handlers::auth::UserId;
 use crate::PooledConn;
 use crate::{constants::CONNECTION_POOL_ERROR, utils::hash_password};
 
@@ -54,12 +55,19 @@ pub async fn get_users_id(
 pub async fn put_users_id(
     pool: web::Data<Pool>,
     id: web::Path<i32>,
+    user_id: UserId,
     update: web::Json<UpdateUser>,
-) -> Result<HttpResponse, Error> {
+) -> Result<HttpResponse, ServiceError> {
+    // Temp until implement privileged users
+    let permission_id = i32::from(user_id);
+    let action_id = id.into_inner();
+    if permission_id != action_id && permission_id != 1 {
+        return Err(ServiceError::Unauthorized);
+    }
+
     let mut conn = pool.get().expect(CONNECTION_POOL_ERROR);
     let user =
-        web::block(move || update_user_by_id(&mut conn, id.into_inner(), update.into_inner()))
-            .await??;
+        web::block(move || update_user_by_id(&mut conn, action_id, update.into_inner())).await??;
 
     Ok(HttpResponse::Ok().json(user))
 }
@@ -68,9 +76,20 @@ pub async fn put_users_id(
 pub async fn delete_users_id(
     pool: web::Data<Pool>,
     id: web::Path<i32>,
-) -> Result<HttpResponse, Error> {
+    user_id: UserId,
+) -> Result<HttpResponse, ServiceError> {
+    // Temp until implement privileged users
+    let permission_id = i32::from(user_id);
+    let action_id = id.into_inner();
+    if permission_id != action_id && permission_id != 1 {
+        return Err(ServiceError::Unauthorized);
+    }
+
     let mut conn = pool.get().expect(CONNECTION_POOL_ERROR);
-    let _ = web::block(move || delete_user_by_id(&mut conn, id.into_inner())).await??;
+    let _ = web::block(move || delete_user_by_id(&mut conn, action_id)).await??;
+
+    // TODO deleting users doesn't remove session data or associated reviews
+    // rn auth only protect user's routes, but needs to be addressed
 
     Ok(HttpResponse::NoContent()
         .content_type("application/json")

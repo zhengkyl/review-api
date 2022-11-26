@@ -55,8 +55,11 @@ pub struct NewReview<'a> {
     pub updated_at: chrono::NaiveDateTime,
 }
 
-pub struct ApiKey {
-    pub key: String,
-    pub user_id: i32,
-    // pub permissions: ,
-}
+// TODO
+// pub enum ApiPermissions {}
+
+// pub struct ApiKey {
+//     pub key: String,
+//     pub user_id: i32,
+//     pub permissions: Vec<ApiPermissions>,
+// }

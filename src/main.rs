@@ -3,6 +3,8 @@ extern crate diesel;
 
 extern crate argon2;
 
+use std::time::Duration;
+
 use ::r2d2::PooledConnection;
 use actix_web::middleware;
 use actix_web::{cookie::Key, get, web, App, HttpResponse, HttpServer, Responder};
@@ -44,7 +46,12 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .wrap(IdentityMiddleware::default())
+            .wrap(
+                IdentityMiddleware::builder()
+                    // Logout after 1 day
+                    .login_deadline(Some(Duration::new(86400, 0)))
+                    .build(),
+            )
             .wrap(SessionMiddleware::new(
                 store.clone(),
                 session_secret.clone(),
@@ -78,7 +85,7 @@ async fn main() -> std::io::Result<()> {
                     .service(reviews::put_reviews_id),
             )
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", 8080))?
     .run()
     .await
 }
