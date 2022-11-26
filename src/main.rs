@@ -32,6 +32,8 @@ async fn main() -> std::io::Result<()> {
     let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is missing");
     let redis_url = std::env::var("REDIS_URL").expect("REDIS_URL is missing");
 
+    openssl_probe::init_ssl_cert_env_vars();
+
     let manager = ConnectionManager::<PgConnection>::new(db_url);
 
     let pool = r2d2::Pool::builder()
