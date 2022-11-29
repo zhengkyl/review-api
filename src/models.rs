@@ -1,8 +1,6 @@
-use crate::{
-    handlers::reviews::{MediaCategory, WatchStatus},
-    schema::*,
-};
+use crate::schema::*;
 use diesel::associations::Associations;
+use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Queryable, Identifiable)]
@@ -14,6 +12,7 @@ pub struct User {
     #[serde(skip_serializing)]
     pub hash: String,
     pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
 }
 
 #[derive(Debug, Insertable)]
@@ -23,7 +22,6 @@ pub struct NewUser<'a> {
     pub last_name: &'a str,
     pub email: &'a str,
     pub hash: &'a str,
-    pub created_at: chrono::NaiveDateTime,
 }
 
 #[derive(Debug, Serialize, Deserialize, Queryable, Identifiable, Associations)]
@@ -38,6 +36,7 @@ pub struct Review {
     pub fun_before: bool,
     pub fun_during: bool,
     pub fun_after: bool,
+    pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }
 
@@ -52,9 +51,47 @@ pub struct NewReview<'a> {
     pub fun_before: bool,
     pub fun_during: bool,
     pub fun_after: bool,
-    pub updated_at: chrono::NaiveDateTime,
 }
 
+#[derive(Debug, Serialize, Deserialize, AsChangeset)]
+#[diesel(table_name = reviews)]
+pub struct EditReview {
+    status: Option<WatchStatus>,
+    text: Option<String>,
+    fun_before: Option<bool>,
+    fun_during: Option<bool>,
+    fun_after: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, DbEnum, Eq, PartialEq, Hash)]
+#[DieselTypePath = "crate::schema::sql_types::WatchStatus"]
+#[DbValueStyle = "PascalCase"]
+pub enum WatchStatus {
+    Completed,
+    Dropped,
+    Watching,
+    PlanToWatch,
+}
+
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, DbEnum, Eq, PartialEq, Hash)]
+#[DieselTypePath = "crate::schema::sql_types::MediaCategory"]
+#[DbValueStyle = "PascalCase"]
+pub enum MediaCategory {
+    Film,
+    Show,
+}
+
+impl TryFrom<String> for MediaCategory {
+    type Error = &'static str;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match value.as_str() {
+            "Film" => Ok(MediaCategory::Film),
+            "Show" => Ok(MediaCategory::Show),
+            _ => Err("Unrecognized MediaCategory"),
+        }
+    }
+}
 // TODO
 // pub enum ApiPermissions {}
 

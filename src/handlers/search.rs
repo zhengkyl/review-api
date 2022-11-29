@@ -75,7 +75,7 @@ pub async fn search_movies(info: web::Query<SearchInfo>) -> Result<HttpResponse,
     }
 
     let Ok(path_query) = serde_urlencoded::to_string(params) else {
-        return Err(ServiceError::BadRequest("Invalid search params".into()));
+        return Err(ServiceError::new(400, "Invalid search params"));
     };
 
     let req = client.get(SEARCH_FILM_BASE.to_owned() + &path_query);
@@ -107,7 +107,7 @@ pub async fn search_shows(info: web::Query<SearchInfo>) -> Result<HttpResponse, 
     }
 
     let Ok(path_query) = serde_urlencoded::to_string(params) else {
-        return Err(ServiceError::BadRequest("Invalid search params".into()));
+        return Err(ServiceError::new(400, "Invalid search params"));
     };
 
     let req = client.get(SEARCH_SHOW_BASE.to_owned() + &path_query);

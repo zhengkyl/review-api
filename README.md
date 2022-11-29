@@ -2,26 +2,37 @@
 
 an attempt to learn how to use rust for a web server
 
-Checklist
+Check `src/main.rs` for all API endpoints.
+
+## Checklist
 
 - [x] user auth
 - [x] search movies and shows using TMDB api
 - [x] add and edit reviews for movies and shows
 - [ ] allow better programmatic access to api
-  - [ ] create public only endpoints
-  - [ ] renegerate api keys for users
+  - [ ] regeneratable api keys for users?
 
-Check `src/main.rs` for all API endpoints.
+## Based on following examples (and many more)
 
-## based on following outdated examples
+- For basic structure
 
-https://gill.net.in/posts/auth-microservice-rust-actix-web1.0-diesel-complete-tutorial/#setting-up-diesel-and-creating-our-user-model
+  - https://gill.net.in/posts/auth-microservice-rust-actix-web1.0-diesel-complete-tutorial/#setting-up-diesel-and-creating-our-user-model
 
-https://hub.qovery.com/guides/tutorial/create-a-blazingly-fast-api-in-rust-part-1/
+- For refactor and advanced stuff
 
-### custom types in diesel
+  - https://cloudmaker.dev/
 
-https://kitsu.me/posts/2020_05_24_custom_types_in_diesel -> use `diesel-derive-enum`
+- For diesel
+
+  - https://github.com/actix/examples/tree/master/databases/diesel
+  - https://kitsu.me/posts/2020_05_24_custom_types_in_diesel
+    - basically, just use `diesel-derive-enum`
+  - https://github.com/diesel-rs/diesel/tree/master/examples/postgres/advanced-blog-cli
+
+- For containerizing
+  - https://blog.logrocket.com/packaging-a-rust-web-service-using-docker/
+  - https://hub.docker.com/r/ekidd/rust-musl-builder/
+    - Not reading the README caused me to waste an entire day debugging. TLDR include `openssl_probe::init_ssl_cert_env_vars();` to make OpenSSL work (for making outward requests).
 
 ## Run locally
 

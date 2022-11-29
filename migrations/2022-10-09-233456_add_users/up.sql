@@ -5,5 +5,6 @@ CREATE TABLE users (
   last_name TEXT NOT NULL,
   email TEXT NOT NULL,
   hash TEXT NOT NULL,
-  created_at TIMESTAMP NOT NULL
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
 )

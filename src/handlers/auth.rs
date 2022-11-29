@@ -1,13 +1,13 @@
 use std::future::{self, Ready};
 
-use crate::constants::CONNECTION_POOL_ERROR;
-use crate::diesel::ExpressionMethods;
-use crate::{errors::ServiceError, models::User, utils::verify_password, Pool, PooledConn};
+use crate::actions::users::find_user_by_email;
+
+use crate::{errors::ServiceError, utils::verify_password, Pool};
 use actix_identity::Identity;
+
 use actix_web::{
     delete, get, post, web, FromRequest, HttpMessage, HttpRequest, HttpResponse, Responder,
 };
-use diesel::{QueryDsl, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize)]
 pub struct AuthData {
@@ -30,8 +30,8 @@ impl From<UserId> for i32 {
 }
 
 impl FromRequest for UserId {
-    type Error = actix_web::Error;
-    type Future = Ready<Result<UserId, actix_web::Error>>;
+    type Error = ServiceError;
+    type Future = Ready<Result<UserId, ServiceError>>;
 
     fn from_request(
         req: &actix_web::HttpRequest,
@@ -43,7 +43,7 @@ impl FromRequest for UserId {
             return future::ready(Ok(UserId(user_id)));
         }
 
-        future::ready(Err(ServiceError::Unauthorized.into()))
+        future::ready(Err(ServiceError::pls(401)))
     }
 }
 
@@ -58,10 +58,23 @@ pub async fn login(
     request: HttpRequest,
     auth_data: web::Json<AuthData>,
     pool: web::Data<Pool>,
-) -> Result<HttpResponse, actix_web::Error> {
-    let mut conn = pool.get().expect(CONNECTION_POOL_ERROR);
+) -> Result<HttpResponse, ServiceError> {
+    let user = web::block(move || {
+        let mut conn = pool.get()?;
+        let potential = find_user_by_email(&mut conn, &auth_data.email)?;
 
-    let user = web::block(move || query_user(auth_data.into_inner(), &mut conn)).await??;
+        let Some(user) = potential else {
+            return Err(ServiceError::pls(404));
+        };
+        let verified = verify_password(&auth_data.password, &user.hash)?;
+
+        if !verified {
+            return Err(ServiceError::pls(401));
+        }
+
+        Ok(user)
+    })
+    .await??;
 
     Identity::login(&request.extensions(), user.id.to_string()).unwrap();
 
@@ -71,22 +84,4 @@ pub async fn login(
 #[get("")]
 pub async fn me(user_id: UserId) -> impl Responder {
     HttpResponse::Ok().json(user_id)
-}
-
-fn query_user(auth_data: AuthData, conn: &mut PooledConn) -> Result<User, ServiceError> {
-    use crate::schema::users::dsl::{email, users};
-
-    let mut items = users
-        .filter(email.eq(&auth_data.email))
-        .load::<User>(conn)?;
-
-    if let Some(user) = items.pop() {
-        if let Ok(verified) = verify_password(&auth_data.password, &user.hash) {
-            if verified {
-                return Ok(user);
-            }
-        }
-    }
-
-    Err(ServiceError::Unauthorized)
 }

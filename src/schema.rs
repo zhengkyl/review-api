@@ -24,6 +24,7 @@ diesel::table! {
         fun_before -> Bool,
         fun_during -> Bool,
         fun_after -> Bool,
+        created_at -> Timestamp,
         updated_at -> Timestamp,
     }
 }
@@ -36,6 +37,7 @@ diesel::table! {
         email -> Text,
         hash -> Text,
         created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 

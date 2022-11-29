@@ -13,10 +13,12 @@ use diesel::r2d2::{self, ConnectionManager};
 
 use actix_identity::IdentityMiddleware;
 use actix_session::{storage::RedisSessionStore, SessionMiddleware};
+mod actions;
 mod constants;
 mod errors;
 mod handlers;
 mod models;
+mod pagination;
 mod schema;
 mod utils;
 
