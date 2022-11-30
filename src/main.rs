@@ -89,7 +89,8 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/reviews")
                     .service(reviews::get_reviews)
                     .service(reviews::post_reviews)
-                    .service(reviews::put_reviews_id),
+                    .service(reviews::put_reviews_by_cat_tmdb_id)
+                    .service(reviews::delete_review_by_cat_tmdb_id),
             )
     })
     .bind(("0.0.0.0", 8080))?

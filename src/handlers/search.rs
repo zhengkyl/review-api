@@ -49,13 +49,13 @@ pub struct Show {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Results<T> {
-    page: i32,
     results: Vec<T>,
-    total_results: i32,
+    page: i32,
     total_pages: i32,
+    total_results: i32,
 }
 
-#[get("/films")]
+#[get("/Film")]
 pub async fn search_movies(info: web::Query<SearchInfo>) -> Result<HttpResponse, ServiceError> {
     let client = awc::Client::default();
 
@@ -87,7 +87,7 @@ pub async fn search_movies(info: web::Query<SearchInfo>) -> Result<HttpResponse,
     Ok(HttpResponse::Ok().json(body))
 }
 
-#[get("/shows")]
+#[get("/Show")]
 pub async fn search_shows(info: web::Query<SearchInfo>) -> Result<HttpResponse, ServiceError> {
     let client = awc::Client::default();
 

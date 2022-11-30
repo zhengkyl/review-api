@@ -1,6 +1,6 @@
 use crate::actions::users::{
-    create_user, delete_user_by_id, find_user_by_id, get_all_users, update_user_by_id, InputUser,
-    QueryParams, UpdateUser,
+    create_user, delete_user_by_id, find_user_by_id, get_all_users, update_auth_user_by_id,
+    InputUser, QueryParams, UpdateUser,
 };
 use crate::handlers::auth::UserId;
 
@@ -59,7 +59,7 @@ pub async fn put_users_id(
 
     let user = web::block(move || {
         let mut conn = pool.get()?;
-        update_user_by_id(&mut conn, path_id, update.into_inner())
+        update_auth_user_by_id(&mut conn, path_id, update.into_inner())
     })
     .await??;
 

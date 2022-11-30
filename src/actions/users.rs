@@ -1,6 +1,6 @@
 use crate::{
     errors::DbError,
-    models::{NewUser, User},
+    models::{AuthenticatedUser, NewUser, User},
     pagination::{Paginate, PaginatedResults},
     schema::users,
     utils::hash_password,
@@ -29,8 +29,8 @@ pub fn get_all_users(
         query = match sort_by.as_ref() {
             "id.asc" => query.order(id.asc()),
             "id.desc" => query.order(id.desc()),
-            "email.asc" => query.order(email.asc()),
-            "email.desc" => query.order(email.desc()),
+            "name.asc" => query.order(name.asc()),
+            "name.desc" => query.order(name.desc()),
             "created_at.asc" => query.order(created_at.asc()),
             "created_at.desc" => query.order(created_at.desc()),
             "updated_at.asc" => query.order(updated_at.asc()),
@@ -54,12 +54,26 @@ pub fn find_user_by_id(conn: &mut PooledConn, idx: i32) -> Result<Option<User>, 
     Ok(user)
 }
 
-pub fn find_user_by_email(conn: &mut PooledConn, email_in: &str) -> Result<Option<User>, DbError> {
+pub fn find_auth_user_by_id(
+    conn: &mut PooledConn,
+    idx: i32,
+) -> Result<Option<AuthenticatedUser>, DbError> {
+    use crate::schema::users::dsl::*;
+
+    let user = users.find(idx).first(conn).optional()?;
+
+    Ok(user)
+}
+
+pub fn find_auth_user_by_email(
+    conn: &mut PooledConn,
+    email_in: &str,
+) -> Result<Option<AuthenticatedUser>, DbError> {
     use crate::schema::users::dsl::{email, users};
 
     let user = users
         .filter(email.eq(email_in))
-        .first::<User>(conn)
+        .first::<AuthenticatedUser>(conn)
         .optional()?;
 
     Ok(user)
@@ -68,21 +82,20 @@ pub fn find_user_by_email(conn: &mut PooledConn, email_in: &str) -> Result<Optio
 #[derive(Debug, Serialize, Deserialize, AsChangeset)]
 #[diesel(table_name = users)]
 pub struct UpdateUser {
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
+    pub name: Option<String>,
     pub email: Option<String>,
 }
 
-pub fn update_user_by_id(
+pub fn update_auth_user_by_id(
     conn: &mut PooledConn,
     idx: i32,
     update: UpdateUser,
-) -> Result<User, DbError> {
+) -> Result<AuthenticatedUser, DbError> {
     use crate::schema::users::dsl::*;
 
     let user = diesel::update(users.find(idx))
         .set(update)
-        .get_result::<User>(conn)?;
+        .get_result::<AuthenticatedUser>(conn)?;
 
     Ok(user)
 }
@@ -97,8 +110,7 @@ pub fn delete_user_by_id(conn: &mut PooledConn, idx: i32) -> Result<usize, DbErr
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputUser {
-    pub first_name: String,
-    pub last_name: String,
+    pub name: String,
     pub email: String,
     pub password: String,
 }
@@ -109,8 +121,7 @@ pub fn create_user(conn: &mut PooledConn, user: InputUser) -> Result<User, DbErr
     let hash = &hash_password(&user.password)?;
 
     let new_user = NewUser {
-        first_name: &user.first_name,
-        last_name: &user.last_name,
+        name: &user.name,
         email: &user.email,
         hash,
     };

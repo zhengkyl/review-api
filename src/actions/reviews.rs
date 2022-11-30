@@ -119,3 +119,22 @@ pub fn update_review(
 
     Ok(review)
 }
+
+pub fn delete_review(
+    conn: &mut PooledConn,
+    user_idx: i32,
+    idx: i32,
+    cat: MediaCategory,
+) -> Result<usize, DbError> {
+    use crate::schema::reviews::dsl::*;
+
+    let deleted = diesel::delete(
+        reviews
+            .filter(user_id.eq(user_idx))
+            .filter(tmdb_id.eq(idx))
+            .filter(category.eq(cat)),
+    )
+    .execute(conn)?;
+
+    Ok(deleted)
+}

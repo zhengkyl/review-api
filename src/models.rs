@@ -6,8 +6,19 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, Queryable, Identifiable)]
 pub struct User {
     pub id: i32,
-    pub first_name: String,
-    pub last_name: String,
+    pub name: String,
+    #[serde(skip_serializing)]
+    pub email: String,
+    #[serde(skip_serializing)]
+    pub hash: String,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+}
+
+#[derive(Debug, Serialize, Queryable)]
+pub struct AuthenticatedUser {
+    pub id: i32,
+    pub name: String,
     pub email: String,
     #[serde(skip_serializing)]
     pub hash: String,
@@ -18,8 +29,7 @@ pub struct User {
 #[derive(Debug, Insertable)]
 #[diesel(table_name = users)]
 pub struct NewUser<'a> {
-    pub first_name: &'a str,
-    pub last_name: &'a str,
+    pub name: &'a str,
     pub email: &'a str,
     pub hash: &'a str,
 }

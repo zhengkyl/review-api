@@ -32,8 +32,7 @@ diesel::table! {
 diesel::table! {
     users (id) {
         id -> Int4,
-        first_name -> Text,
-        last_name -> Text,
+        name -> Text,
         email -> Text,
         hash -> Text,
         created_at -> Timestamp,

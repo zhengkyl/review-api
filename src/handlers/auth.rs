@@ -1,6 +1,6 @@
 use std::future::{self, Ready};
 
-use crate::actions::users::find_user_by_email;
+use crate::actions::users::{find_auth_user_by_email, find_auth_user_by_id};
 
 use crate::{errors::ServiceError, utils::verify_password, Pool};
 use actix_identity::Identity;
@@ -62,7 +62,7 @@ pub async fn login(
 ) -> Result<HttpResponse, ServiceError> {
     let user = web::block(move || {
         let mut conn = pool.get()?;
-        let potential = find_user_by_email(&mut conn, &auth_data.email)?;
+        let potential = find_auth_user_by_email(&mut conn, &auth_data.email)?;
 
         let Some(user) = potential else {
             return Err(ServiceError::pls(404));
@@ -83,6 +83,15 @@ pub async fn login(
 }
 
 #[get("")]
-pub async fn me(user_id: UserId) -> impl Responder {
-    HttpResponse::Ok().json(json!({ "id": user_id }))
+pub async fn me(pool: web::Data<Pool>, user_id: UserId) -> Result<HttpResponse, ServiceError> {
+    let user = web::block(move || {
+        let mut conn = pool.get()?;
+        find_auth_user_by_id(&mut conn, i32::from(user_id))
+    })
+    .await??;
+
+    let Some(user) = user else {
+        return Err(ServiceError::pls(404));
+    };
+    Ok(HttpResponse::Ok().json(user))
 }
