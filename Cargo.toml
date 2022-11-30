@@ -11,7 +11,7 @@ diesel = { version = "2.0.0", features = ["postgres", "r2d2", "chrono"] }
 dotenvy = "0.15.5"
 r2d2 = "0.8.10"
 serde = "1.0.145"
-chrono = { version = "0.4.22", features=["serde"] }
+chrono = { version = "0.4.22", features=["serde", "clock"] }
 rust-argon2 = "1.0"
 lazy_static = "1.4.0"
 rand = "0.8.5"

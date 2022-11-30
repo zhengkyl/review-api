@@ -13,6 +13,7 @@ pub struct ReviewsQuery {
     pub page: Option<i64>,
     pub per_page: Option<i64>,
     pub sort_by: Option<String>,
+    pub user_id: Option<i32>,
     pub category: Option<MediaCategory>,
     pub status: Option<WatchStatus>,
     pub fun_before: Option<bool>,
@@ -22,14 +23,15 @@ pub struct ReviewsQuery {
 
 pub fn get_all_reviews(
     conn: &mut PooledConn,
-    user_idx: i32,
     params: ReviewsQuery,
 ) -> Result<PaginatedResults<Review>, DbError> {
     use crate::schema::reviews::dsl::*;
 
     let mut query = reviews::table().into_boxed();
-    query = query.filter(user_id.eq(user_idx));
 
+    if let Some(user_id_in) = params.user_id {
+        query = query.filter(user_id.eq(user_id_in));
+    }
     if let Some(category_in) = params.category {
         query = query.filter(category.eq(category_in));
     }

@@ -4,6 +4,136 @@ an attempt to learn how to use rust for a web server
 
 Check `src/main.rs` for all API endpoints.
 
+There is no frontend.
+
+## Endpoints
+
+https://review-api.fly.dev
+
+<details>
+  <summary>
+    <h2><code>/auth</code> endpoints </h2>
+  </summary>
+
+### `GET /auth`
+
+Check current user id.
+
+#### Response
+
+```json
+{
+  id: USER_ID
+}
+```
+
+<details>
+  <summary>Try with <code>curl</code></summary>
+
+```sh
+curl --location --request GET 'https://review-api.fly.dev/auth' \
+--header 'Cookie: id=YourSessionIdCookie'
+```
+
+</details>
+
+### `DEL /auth`
+
+This logs out the user.
+
+#### Response
+
+```json
+// no content
+```
+
+<details>
+  <summary>Try with <code>curl</code></summary>
+
+```sh
+curl --location --request DELETE 'https://review-api.fly.dev/auth' \
+--header 'Cookie: id=YourSessionIdCookie'
+```
+
+</details>
+
+### `POST /auth`
+
+This logs in the user. The response header contains the `set-cookie` header with the `id` cookie.
+
+#### Response
+
+```json
+// no content
+```
+
+<details>
+  <summary>Try with <code>curl</code></summary>
+
+```sh
+curl --location --request POST 'https://review-api.fly.dev/auth' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "email": "kyle@zheng.com",
+    "password": "password"
+}'
+```
+
+</details>
+
+</details>
+
+<details>
+  <summary>
+    <h2><code>/users</code> endpoints </h2>
+  </summary>
+
+### `POST /users`
+
+This creates a new user.
+
+### Request body
+
+```json
+{
+  "first_name": "Kyle",
+  "last_name": "Zheng",
+  "email": "kyle@zheng.com",
+  "password": "password"
+}
+```
+
+#### Response
+
+```json
+{
+  "id": 3,
+  "first_name": "Kyle",
+  "last_name": "Zheng",
+  "email": "kyle@zheng.com",
+  "created_at": "2022-11-30T07:27:26.595672",
+  "updated_at": "2022-11-30T07:27:26.595672"
+}
+```
+
+<details>
+  <summary>Try with <code>curl</code></summary>
+
+```sh
+curl --location --request POST 'https://review-api.fly.dev/users' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john@doe.com",
+    "password": "password"
+}'
+```
+
+</details>
+
+</details>
+
 ## Checklist
 
 - [x] user auth
@@ -65,7 +195,7 @@ docker build -t review-api:latest .
 docker run --rm -p 8080:8080 --env-file .env.dev review-api
 ```
 
-### Connecting to deployed fly app
+## Connecting to deployed fly app
 
 https://fly.io/docs/reference/private-networking/#private-network-vpn
 

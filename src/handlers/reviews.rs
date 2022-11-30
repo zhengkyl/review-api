@@ -13,12 +13,11 @@ use crate::{
 #[get("")]
 pub async fn get_reviews(
     pool: web::Data<Pool>,
-    user_id: UserId,
     query: web::Query<ReviewsQuery>,
 ) -> Result<HttpResponse, ServiceError> {
     let reviews = web::block(move || {
         let mut conn = pool.get()?;
-        get_all_reviews(&mut conn, i32::from(user_id), query.into_inner())
+        get_all_reviews(&mut conn, query.into_inner())
     })
     .await??;
 

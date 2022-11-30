@@ -3,13 +3,15 @@ extern crate diesel;
 
 extern crate argon2;
 
-use std::time::Duration;
-
 use ::r2d2::PooledConnection;
 use actix_web::middleware;
 use actix_web::{cookie::Key, get, web, App, HttpResponse, HttpServer, Responder};
+use chrono::{DateTime, Utc};
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager};
+use serde::Serialize;
+use serde_json::json;
+use std::time::Duration;
 
 use actix_identity::IdentityMiddleware;
 use actix_session::{storage::RedisSessionStore, SessionMiddleware};
@@ -62,7 +64,8 @@ async fn main() -> std::io::Result<()> {
             ))
             .wrap(middleware::NormalizePath::trim())
             .app_data(web::Data::new(pool.clone()))
-            .service(hello)
+            .app_data(web::Data::new(Utc::now()))
+            .service(health)
             .service(
                 web::scope("/auth")
                     .service(auth::login)
@@ -94,7 +97,23 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
+#[derive(Serialize)]
+enum ServerStatus {
+    #[serde(rename(serialize = "down tremendous"))]
+    Alive,
+    Dead,
+}
+
 #[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
+async fn health(birth: web::Data<DateTime<Utc>>) -> impl Responder {
+    // TODO perhaps make this useful
+    let status = match true {
+        true => ServerStatus::Alive,
+        _ => ServerStatus::Dead,
+    };
+    HttpResponse::Ok().json(json!({
+        "last_deploy": birth.into_inner().to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
+        "status": status,
+        "what i'm wearing": "🎩👕👖👟"
+    }))
 }
