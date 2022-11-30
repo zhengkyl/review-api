@@ -17,9 +17,21 @@ https://review-api.fly.dev
 
 All other endpoints require authentication. This means the `id` cookie received from `POST /auth` needs to be sent with each request. This happens automatically if using a browser.
 
+Example with `curl`
+
+```sh
+curl --location --request GET 'https://review-api.fly.dev/auth' \
+--header 'Cookie: id=YOUR_SESSION_ID'
+```
+
+<details>
+<summary>
+<h2><code>/auth</code></h2>
+</summary>
+
 ### `GET /auth`
 
-Check current user id.
+Check current user. This shows the `email` field.
 
 #### Response body
 
@@ -39,6 +51,13 @@ This logs out the user.
 
 ### `POST /auth`
 
+```json
+{
+  "email": "kyle@zheng.com",
+  "password": "password"
+}
+```
+
 This logs in the user.
 
 #### Response header
@@ -46,6 +65,13 @@ This logs in the user.
 | Key        | Value                                               |
 | ---------- | --------------------------------------------------- |
 | set-cookie | id=YOUR_SESION_ID_COOKIE; Path=/; Secure; HttpOnly; |
+
+</details>
+
+<details>
+<summary>
+<h2><code>/users</code></h2>
+</summary>
 
 ### `GET /users`
 
@@ -123,6 +149,8 @@ This creates a new user.
 
 #### Request body
 
+All fields are optional.
+
 ```json
 {
   "name": "Loid",
@@ -132,10 +160,13 @@ This creates a new user.
 
 ### Response body
 
+This shows the `email` field, because the route is authenticated.
+
 ```json
 {
   "id": 3,
   "name": "Loid",
+  "email": "loid@forger.com",
   "created_at": "2022-11-30T17:13:11.250255",
   "updated_at": "2022-11-30T17:27:53.894057"
 }
@@ -151,11 +182,22 @@ This creates a new user.
 }
 ```
 
+</details>
+
+<details>
+<summary>
+<h2><code>/search</code></h2>
+</summary>
+
 ### `GET /search/{category}?query=`
 
 Category is `Film` | `Show`
 
 This mostly just a wrapper around the The Movie Database (TMDB) API.
+
+https://developers.themoviedb.org/3/search/search-movies
+
+https://developers.themoviedb.org/3/search/search-tv-shows
 
 #### Query params
 
@@ -185,6 +227,13 @@ This mostly just a wrapper around the The Movie Database (TMDB) API.
   "total_pages": 1
 }
 ```
+
+</details>
+
+<details>
+<summary>
+<h2><code>/reviews</code></h2>
+</summary>
 
 ### `GET /reviews`
 
@@ -255,9 +304,11 @@ This mostly just a wrapper around the The Movie Database (TMDB) API.
 }
 ```
 
-### `PUT /reviews/{category/{tmdb_id}`
+### `PUT /reviews/{category}/{tmdb_id}`
 
 #### Request body
+
+All fields are optional.
 
 ```json
 {
@@ -295,6 +346,8 @@ This mostly just a wrapper around the The Movie Database (TMDB) API.
   "deleted": 1
 }
 ```
+
+</details>
 
 ## Checklist
 
