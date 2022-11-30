@@ -12,7 +12,9 @@ CREATE TABLE reviews (
   fun_before BOOLEAN NOT NULL,
   fun_during BOOLEAN NOT NULL,
   fun_after BOOLEAN NOT NULL,
-  created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id, tmdb_id, category)
 );
+
+SELECT diesel_manage_updated_at('reviews');

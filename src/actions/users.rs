@@ -35,7 +35,7 @@ pub fn get_all_users(
             "created_at.desc" => query.order(created_at.desc()),
             "updated_at.asc" => query.order(updated_at.asc()),
             "updated_at.desc" => query.order(updated_at.desc()),
-            _ => query,
+            _ => query.order(id.asc()),
         }
     }
 

@@ -9,6 +9,7 @@ use actix_web::{
     delete, get, post, web, FromRequest, HttpMessage, HttpRequest, HttpResponse, Responder,
 };
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 #[derive(Debug, Deserialize)]
 pub struct AuthData {
     pub email: String,
@@ -83,5 +84,5 @@ pub async fn login(
 
 #[get("")]
 pub async fn me(user_id: UserId) -> impl Responder {
-    HttpResponse::Ok().json(user_id)
+    HttpResponse::Ok().json(json!({ "id": user_id }))
 }

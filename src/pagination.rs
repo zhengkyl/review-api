@@ -61,7 +61,8 @@ impl<T> Paginated<T> {
         Self: LoadQuery<'a, PgConnection, (U, i64)>,
     {
         let page = self.page;
-        let per_page = self.page;
+        let per_page = self.per_page;
+
         let records = self.load::<(U, i64)>(conn)?;
         let total_results = records.get(0).map(|x| x.1).unwrap_or(0);
         let results = records.into_iter().map(|x| x.0).collect();
@@ -87,6 +88,26 @@ where
     T: QueryFragment<Pg>,
 {
     fn walk_ast<'b>(&'b self, mut out: AstPass<'_, 'b, Pg>) -> QueryResult<()> {
+        // https://stackoverflow.com/questions/28888375/run-a-query-with-a-limit-offset-and-also-get-the-total-number-of-rows
+        // When offset > rows, this returns a row of nulls + full_count
+        // However, can't converted nulls into non nullable...
+
+        // out.push_sql("WITH cte AS ( SELECT * FROM (");
+        // self.query.walk_ast(out.reborrow())?;
+        // out.push_sql(") t ) ");
+
+        // out.push_sql("SELECT * FROM (");
+        // out.push_sql(" TABLE cte");
+        // out.push_sql(" LIMIT ");
+        // out.push_bind_param::<BigInt, _>(&self.per_page)?;
+        // out.push_sql(" OFFSET ");
+        // out.push_bind_param::<BigInt, _>(&self.offset)?;
+
+        // out.push_sql(" ) sub ");
+        // out.push_sql("RIGHT JOIN (SELECT count(*) FROM cte) c(full_count) ON true;");
+
+        // Original
+        // This returns a count of 0 if offset > rows
         out.push_sql("SELECT *, COUNT(*) OVER () FROM (");
         self.query.walk_ast(out.reborrow())?;
         out.push_sql(") t LIMIT ");
