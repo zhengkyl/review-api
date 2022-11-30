@@ -10,129 +10,291 @@ There is no frontend.
 
 https://review-api.fly.dev
 
-<details>
-  <summary>
-    <h2><code>/auth</code> endpoints </h2>
-  </summary>
+| Public endpoints                           |
+| ------------------------------------------ |
+| All `GET` endpoints except for `GET /auth` |
+| `POST /users` to create a new user         |
+
+All other endpoints require authentication. This means the `id` cookie received from `POST /auth` needs to be sent with each request. This happens automatically if using a browser.
 
 ### `GET /auth`
 
 Check current user id.
 
-#### Response
+#### Response body
 
 ```json
 {
-  id: USER_ID
+  "id": 1,
+  "name": "Kyle",
+  "email": "kyle@zheng.com",
+  "created_at": "2022-11-30T17:05:36.313355",
+  "updated_at": "2022-11-30T17:05:36.313355"
 }
 ```
 
-<details>
-  <summary>Try with <code>curl</code></summary>
-
-```sh
-curl --location --request GET 'https://review-api.fly.dev/auth' \
---header 'Cookie: id=YourSessionIdCookie'
-```
-
-</details>
-
-### `DEL /auth`
+### `DELETE /auth`
 
 This logs out the user.
 
-#### Response
-
-```json
-// no content
-```
-
-<details>
-  <summary>Try with <code>curl</code></summary>
-
-```sh
-curl --location --request DELETE 'https://review-api.fly.dev/auth' \
---header 'Cookie: id=YourSessionIdCookie'
-```
-
-</details>
-
 ### `POST /auth`
 
-This logs in the user. The response header contains the `set-cookie` header with the `id` cookie.
+This logs in the user.
 
-#### Response
+#### Response header
+
+| Key        | Value                                               |
+| ---------- | --------------------------------------------------- |
+| set-cookie | id=YOUR_SESION_ID_COOKIE; Path=/; Secure; HttpOnly; |
+
+### `GET /users`
+
+#### Query params
+
+| Param    | Type                                                                                                         | Default |
+| -------- | ------------------------------------------------------------------------------------------------------------ | ------- |
+| page     | 0 < integer                                                                                                  | 1       |
+| per_page | 0 < integer < 51                                                                                             | 10      |
+| sort_by  | `FIELD.ORDER`<br> FIELD is one of `id`, `name`, `created_at`, `updated_at`<br> ORDER is one of `asc`, `desc` | id.asc  |
+
+#### Request body
 
 ```json
-// no content
+{
+  "results": [
+    {
+      "id": 1,
+      "name": "Kyle",
+      "created_at": "2022-11-30T17:05:36.313355",
+      "updated_at": "2022-11-30T17:05:36.313355"
+    },
+    {
+      "id": 3,
+      "name": "Loid",
+      "created_at": "2022-11-30T17:13:11.250255",
+      "updated_at": "2022-11-30T17:27:53.894057"
+    }
+  ],
+  "page": 1,
+  "total_pages": 1,
+  "total_results": 2
+}
 ```
 
-<details>
-  <summary>Try with <code>curl</code></summary>
+### `GET /users/{id}`
 
-```sh
-curl --location --request POST 'https://review-api.fly.dev/auth' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "email": "kyle@zheng.com",
-    "password": "password"
-}'
+#### Request body
+
+```json
+{
+  "id": 1,
+  "name": "Kyle",
+  "created_at": "2022-11-30T17:05:36.313355",
+  "updated_at": "2022-11-30T17:05:36.313355"
+}
 ```
-
-</details>
-
-</details>
-
-<details>
-  <summary>
-    <h2><code>/users</code> endpoints </h2>
-  </summary>
 
 ### `POST /users`
 
 This creates a new user.
 
-### Request body
+#### Request body
 
 ```json
 {
-  "first_name": "Kyle",
-  "last_name": "Zheng",
-  "email": "kyle@zheng.com",
+  "name": "Twilight",
+  "email": "secret@spy.com",
   "password": "password"
 }
 ```
 
-#### Response
+#### Response body
 
 ```json
 {
   "id": 3,
-  "first_name": "Kyle",
-  "last_name": "Zheng",
-  "email": "kyle@zheng.com",
-  "created_at": "2022-11-30T07:27:26.595672",
-  "updated_at": "2022-11-30T07:27:26.595672"
+  "name": "Twilight",
+  "created_at": "2022-11-30T17:13:11.250255",
+  "updated_at": "2022-11-30T17:13:11.250255"
 }
 ```
 
-<details>
-  <summary>Try with <code>curl</code></summary>
+### `PUT /users/{id}`
 
-```sh
-curl --location --request POST 'https://review-api.fly.dev/users' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "first_name": "John",
-    "last_name": "Doe",
-    "email": "john@doe.com",
-    "password": "password"
-}'
+#### Request body
+
+```json
+{
+  "name": "Loid",
+  "email": "loid@forger.com"
+}
 ```
 
-</details>
+### Response body
 
-</details>
+```json
+{
+  "id": 3,
+  "name": "Loid",
+  "created_at": "2022-11-30T17:13:11.250255",
+  "updated_at": "2022-11-30T17:27:53.894057"
+}
+```
+
+### `DELETE /users/{id}`
+
+#### Response body
+
+```json
+{
+  "deleted": 1
+}
+```
+
+### `GET /search/{category}?query=`
+
+Category is `Film` | `Show`
+
+This mostly just a wrapper around the The Movie Database (TMDB) API.
+
+#### Query params
+
+| Param | Type            | Default |
+| ----- | --------------- | ------- |
+| page  | 0 < integer     | 1       |
+| lang  | ISO 639-1 value | en-US   |
+| year  | integer         | n/a     |
+
+#### Response body
+
+```json
+{
+  "page": 1,
+  "results": [
+    {
+      "id": 505642,
+      "title": "Black Panther: Wakanda Forever",
+      "original_title": "Black Panther: Wakanda Forever",
+      "original_language": "en",
+      "release_date": "2022-11-09",
+      "overview": "Queen Ramonda, Shuri, M’Baku, Okoye and the Dora Milaje fight to protect their nation from intervening world powers in the wake of King T’Challa’s death. As the Wakandans strive to embrace their next chapter, the heroes must band together with the help of War Dog Nakia and Everett Ross and forge a new path for the kingdom of Wakanda.",
+      "poster_path": "/sv1xJUazXeYqALzczSZ3O6nkH75.jpg"
+    }
+  ],
+  "total_results": 1,
+  "total_pages": 1
+}
+```
+
+### `GET /reviews`
+
+#### Query params
+
+| Param      | Type                                                                                                      | Default |
+| ---------- | --------------------------------------------------------------------------------------------------------- | ------- |
+| page       | 0 < integer                                                                                               | 1       |
+| per_page   | 0 < integer < 51                                                                                          | 10      |
+| sort_by    | `FIELD.ORDER`<br> FIELD is one of `tmdb_id`, `created_at`, `updated_at`<br> ORDER is one of `asc`, `desc` | id.asc  |
+| user_id    | user id                                                                                                   | n/a     |
+| category   | `Film` \| `Show`                                                                                          | n/a     |
+| status     | `Completed` \| `Watching` \| `Dropped` \| `PlanToWatch`                                                   | n/a     |
+| fun_before | bool                                                                                                      | n/a     |
+| fun_during | bool                                                                                                      | n/a     |
+| fun_after  | bool                                                                                                      | n/a     |
+
+#### Response body
+
+```json
+{
+  "results": [
+    {
+      "user_id": 1,
+      "tmdb_id": 505642,
+      "category": "Film",
+      "status": "Completed",
+      "text": "🙅🏿‍♂️",
+      "fun_before": true,
+      "fun_during": true,
+      "fun_after": true,
+      "created_at": "2022-11-30T18:09:58.829342",
+      "updated_at": "2022-11-30T18:18:00.720356"
+    }
+  ],
+  "page": 1,
+  "total_pages": 1,
+  "total_results": 1
+}
+```
+
+### `POST /reviews`
+
+#### Request body
+
+```json
+{
+  "tmdb_id": 505642,
+  "category": "Film",
+  "status": "Completed"
+}
+```
+
+#### Response body
+
+```json
+{
+  "user_id": 1,
+  "tmdb_id": 505642,
+  "category": "Film",
+  "status": "Completed",
+  "text": "",
+  "fun_before": false,
+  "fun_during": false,
+  "fun_after": false,
+  "created_at": "2022-11-30T18:09:58.829342",
+  "updated_at": "2022-11-30T18:09:58.829342"
+}
+```
+
+### `PUT /reviews/{category/{tmdb_id}`
+
+#### Request body
+
+```json
+{
+  "status": "Completed",
+  "text": "🙅🏿‍♂️",
+  "fun_before": true,
+  "fun_during": true,
+  "fun_after": true
+}
+```
+
+#### Response body
+
+```json
+{
+  "user_id": 1,
+  "tmdb_id": 505642,
+  "category": "Film",
+  "status": "Completed",
+  "text": "🙅🏿‍♂️",
+  "fun_before": true,
+  "fun_during": true,
+  "fun_after": true,
+  "created_at": "2022-11-30T18:09:58.829342",
+  "updated_at": "2022-11-30T18:18:00.720356"
+}
+```
+
+### `DELETE /reviews/{category}/{tmdb_id}`
+
+#### Response body
+
+```json
+{
+  "deleted": 1
+}
+```
 
 ## Checklist
 
