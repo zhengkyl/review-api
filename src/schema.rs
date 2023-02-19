@@ -15,7 +15,7 @@ diesel::table! {
     use super::sql_types::MediaCategory;
     use super::sql_types::WatchStatus;
 
-    reviews (user_id, tmdb_id, category) {
+    reviews (user_id, tmdb_id, category, season) {
         user_id -> Int4,
         tmdb_id -> Int4,
         category -> MediaCategory,
@@ -26,6 +26,7 @@ diesel::table! {
         fun_after -> Bool,
         created_at -> Timestamp,
         updated_at -> Timestamp,
+        season -> Int4,
     }
 }
 

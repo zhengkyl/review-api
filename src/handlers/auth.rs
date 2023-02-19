@@ -9,7 +9,7 @@ use actix_web::{
     delete, get, post, web, FromRequest, HttpMessage, HttpRequest, HttpResponse, Responder,
 };
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+
 #[derive(Debug, Deserialize)]
 pub struct AuthData {
     pub email: String,

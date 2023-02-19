@@ -72,6 +72,7 @@ pub struct InputReview {
     tmdb_id: i32,
     category: MediaCategory,
     status: WatchStatus,
+    season: Option<i32>,
 }
 
 pub fn create_review_for_user(
@@ -81,11 +82,12 @@ pub fn create_review_for_user(
 ) -> Result<Review, DbError> {
     use crate::schema::reviews::dsl::*;
 
-    let new_film_review = NewReview {
-        category: input_review.category,
-        tmdb_id: input_review.tmdb_id,
-        status: input_review.status,
+    let new_review = NewReview {
         user_id: idx,
+        tmdb_id: input_review.tmdb_id,
+        category: input_review.category,
+        season: input_review.season,
+        status: input_review.status,
         text: "",
         fun_before: false,
         fun_during: false,
@@ -93,7 +95,7 @@ pub fn create_review_for_user(
     };
 
     let res = diesel::insert_into(reviews)
-        .values(new_film_review)
+        .values(new_review)
         .get_result::<Review>(conn)?;
 
     Ok(res)
@@ -101,18 +103,22 @@ pub fn create_review_for_user(
 
 pub fn update_review(
     conn: &mut PooledConn,
-    user_idx: i32,
-    idx: i32,
-    cat: MediaCategory,
+    user_id_v: i32,
+    tmdb_id_v: i32,
+    category_v: MediaCategory,
+    season_v: Option<i32>,
     edits: EditReview,
 ) -> Result<Review, DbError> {
     use crate::schema::reviews::dsl::*;
 
+    let season_v = season_v.unwrap_or(-1);
+
     let review = diesel::update(
         reviews
-            .filter(user_id.eq(user_idx))
-            .filter(tmdb_id.eq(idx))
-            .filter(category.eq(cat)),
+            .filter(user_id.eq(user_id_v))
+            .filter(tmdb_id.eq(tmdb_id_v))
+            .filter(category.eq(category_v))
+            .filter(season.eq(season_v)),
     )
     .set(edits)
     .get_result(conn)?;
@@ -122,17 +128,21 @@ pub fn update_review(
 
 pub fn delete_review(
     conn: &mut PooledConn,
-    user_idx: i32,
-    idx: i32,
-    cat: MediaCategory,
+    user_id_v: i32,
+    tmdb_id_v: i32,
+    category_v: MediaCategory,
+    season_v: Option<i32>,
 ) -> Result<usize, DbError> {
     use crate::schema::reviews::dsl::*;
 
+    let season_v = season_v.unwrap_or(-1);
+
     let deleted = diesel::delete(
         reviews
-            .filter(user_id.eq(user_idx))
-            .filter(tmdb_id.eq(idx))
-            .filter(category.eq(cat)),
+            .filter(user_id.eq(user_id_v))
+            .filter(tmdb_id.eq(tmdb_id_v))
+            .filter(category.eq(category_v))
+            .filter(season.eq(season_v)),
     )
     .execute(conn)?;
 

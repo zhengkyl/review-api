@@ -48,14 +48,21 @@ pub struct Review {
     pub fun_after: bool,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
+    #[serde(skip_serializing_if = "invalid_season")]
+    pub season: i32,
+}
+
+fn invalid_season(season: &i32) -> bool {
+    return *season < 0;
 }
 
 #[derive(Debug, Insertable)]
 #[diesel(table_name = reviews)]
 pub struct NewReview<'a> {
-    pub category: MediaCategory,
-    pub tmdb_id: i32,
     pub user_id: i32,
+    pub tmdb_id: i32,
+    pub category: MediaCategory,
+    pub season: Option<i32>,
     pub status: WatchStatus,
     pub text: &'a str,
     pub fun_before: bool,

@@ -1,4 +1,4 @@
-use actix_web::{delete, get, post, put, web, HttpResponse};
+use actix_web::{get, post, web, HttpRequest, HttpResponse};
 use serde_json::json;
 
 use crate::{
@@ -41,8 +41,10 @@ pub async fn post_reviews(
     Ok(HttpResponse::Ok().json(review))
 }
 
-#[put("/{category}/{id}")]
-pub async fn put_reviews_by_cat_tmdb_id(
+// #[put("/{category}/{id}/{season}")]
+// #[put("/{category}/{id}")]
+pub async fn put_reviews(
+    req: HttpRequest,
     pool: web::Data<Pool>,
     user_id: UserId,
     path: web::Path<(String, i32)>,
@@ -51,6 +53,11 @@ pub async fn put_reviews_by_cat_tmdb_id(
     let (category, tmdb_id) = path.into_inner();
 
     let category = MediaCategory::try_from(category);
+
+    let season = match req.match_info().get("season") {
+        Some(str) => str.parse().ok(),
+        None => None,
+    };
 
     let Ok(category) = category else {
         return Err(ServiceError::new(400, "Unrecognized media category"));
@@ -63,6 +70,7 @@ pub async fn put_reviews_by_cat_tmdb_id(
             user_id.into(),
             tmdb_id,
             category,
+            season,
             item.into_inner(),
         )
     })
@@ -71,13 +79,20 @@ pub async fn put_reviews_by_cat_tmdb_id(
     Ok(HttpResponse::Ok().json(review))
 }
 
-#[delete("/{category}/{id}")]
-pub async fn delete_review_by_cat_tmdb_id(
+// #[delete("/{category}/{id}/{season}")]
+// #[delete("/{category}/{id}")]
+pub async fn delete_reviews(
+    req: HttpRequest,
     pool: web::Data<Pool>,
     user_id: UserId,
     path: web::Path<(String, i32)>,
 ) -> Result<HttpResponse, ServiceError> {
     let (category, tmdb_id) = path.into_inner();
+
+    let season = match req.match_info().get("season") {
+        Some(str) => str.parse().ok(),
+        None => None,
+    };
 
     let category = MediaCategory::try_from(category);
 
@@ -87,7 +102,7 @@ pub async fn delete_review_by_cat_tmdb_id(
 
     let deleted = web::block(move || {
         let mut conn = pool.get()?;
-        delete_review(&mut conn, user_id.into(), tmdb_id, category)
+        delete_review(&mut conn, user_id.into(), tmdb_id, category, season)
     })
     .await??;
 

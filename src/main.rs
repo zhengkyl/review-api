@@ -89,8 +89,11 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/reviews")
                     .service(reviews::get_reviews)
                     .service(reviews::post_reviews)
-                    .service(reviews::put_reviews_by_cat_tmdb_id)
-                    .service(reviews::delete_review_by_cat_tmdb_id),
+                    .service(
+                        web::resource(["/{category}/{id}/{season}", "/{category}/{id}"])
+                            .route(web::put().to(reviews::put_reviews))
+                            .route(web::delete().to(reviews::delete_reviews)),
+                    ),
             )
     })
     .bind(("0.0.0.0", 8080))?
