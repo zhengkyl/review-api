@@ -79,7 +79,7 @@ pub async fn login(
 
     Identity::login(&request.extensions(), user.id.to_string()).unwrap();
 
-    Ok(HttpResponse::Ok().finish())
+    Ok(HttpResponse::Ok().json(user))
 }
 
 #[get("")]

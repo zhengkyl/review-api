@@ -66,6 +66,18 @@ This logs in the user.
 | ---------- | --------------------------------------------------- |
 | set-cookie | id=YOUR_SESION_ID_COOKIE; Path=/; Secure; HttpOnly; |
 
+#### Response body
+
+```json
+{
+  "id": 1,
+  "name": "Kyle Zheng",
+  "email": "kyle@zheng.com",
+  "created_at": "2022-11-30T20:03:35.554592",
+  "updated_at": "2022-11-30T20:03:35.554592"
+}
+```
+
 </details>
 
 <details>
@@ -285,6 +297,13 @@ https://developers.themoviedb.org/3/search/search-tv-shows
   "category": "Film",
   "status": "Completed"
 }
+or
+{
+  "tmdb_id": 505642,
+  "category": "Show",
+  "season": 1,
+  "status": "Completed"
+}
 ```
 
 #### Response body
@@ -305,6 +324,8 @@ https://developers.themoviedb.org/3/search/search-tv-shows
 ```
 
 ### `PUT /reviews/{category}/{tmdb_id}`
+
+### `PUT /reviews/{category}/{tmdb_id}/{season}`
 
 #### Request body
 
@@ -338,6 +359,8 @@ All fields are optional.
 ```
 
 ### `DELETE /reviews/{category}/{tmdb_id}`
+
+### `DELETE /reviews/{category}/{tmdb_id}/{season}`
 
 #### Response body
 
