@@ -11,8 +11,8 @@ pub struct User {
     pub email: String,
     #[serde(skip_serializing)]
     pub hash: String,
-    pub created_at: chrono::NaiveDateTime,
-    pub updated_at: chrono::NaiveDateTime,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug, Serialize, Queryable)]
@@ -22,8 +22,8 @@ pub struct AuthenticatedUser {
     pub email: String,
     #[serde(skip_serializing)]
     pub hash: String,
-    pub created_at: chrono::NaiveDateTime,
-    pub updated_at: chrono::NaiveDateTime,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug, Insertable)]
@@ -46,8 +46,8 @@ pub struct Review {
     pub fun_before: bool,
     pub fun_during: bool,
     pub fun_after: bool,
-    pub created_at: chrono::NaiveDateTime,
-    pub updated_at: chrono::NaiveDateTime,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
     #[serde(skip_serializing_if = "invalid_season")]
     pub season: i32,
 }
