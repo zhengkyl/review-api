@@ -9,7 +9,6 @@ use actix_web::{cookie::Key, get, web, App, HttpResponse, HttpServer, Responder}
 use chrono::{DateTime, Utc};
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager};
-use serde::Serialize;
 use serde_json::json;
 use std::time::Duration;
 
@@ -101,23 +100,10 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-#[derive(Serialize)]
-enum ServerStatus {
-    #[serde(rename(serialize = "down tremendous"))]
-    Alive,
-    Dead,
-}
-
 #[get("/")]
 async fn health(birth: web::Data<DateTime<Utc>>) -> impl Responder {
     // TODO perhaps make this useful
-    let status = match true {
-        true => ServerStatus::Alive,
-        _ => ServerStatus::Dead,
-    };
     HttpResponse::Ok().json(json!({
         "last_deploy": birth.into_inner().to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
-        "status": status,
-        "what i'm wearing": "🎩👕👖👟"
     }))
 }

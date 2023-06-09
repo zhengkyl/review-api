@@ -30,10 +30,10 @@ impl ServiceError {
 impl Display for ServiceError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self.status {
-            400 => write!(f, "i'm so sorry that you're stupid: {}", self.message),
-            401 => write!(f, "sir, ✋👮 i need to see your id: {}", self.message),
-            404 => write!(f, "out of stock. try again later: {}", self.message),
-            _ => write!(f, "internal server did an oopsie 👉👈: {}", self.message),
+            400 => write!(f, "it's not me, it's you: {}", self.message),
+            401 => write!(f, "✋👮 stop right there: {}", self.message),
+            404 => write!(f, "found it. jk: {}", self.message),
+            _ => write!(f, "👉👈: {}", self.message),
         }
     }
 }
@@ -47,7 +47,7 @@ impl ResponseError for ServiceError {
     }
 
     fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code()).json(json!({"message": self.message}))
+        HttpResponse::build(self.status_code()).json(json!({ "message": self.to_string() }))
     }
 }
 
@@ -96,7 +96,11 @@ impl From<diesel::result::Error> for ServiceError {
     fn from(error: diesel::result::Error) -> Self {
         match error {
             diesel::result::Error::NotFound => ServiceError::pls(404),
-            err => ServiceError::new(500, format!("diesel says {}", err)),
+            diesel::result::Error::DatabaseError(
+                diesel::result::DatabaseErrorKind::UniqueViolation,
+                _,
+            ) => ServiceError::new(400, error.to_string()),
+            err => ServiceError::new(500, format!("other db error: {}", err)),
         }
     }
 }

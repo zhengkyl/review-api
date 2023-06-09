@@ -1,5 +1,5 @@
 use crate::{
-    errors::DbError,
+    errors::{DbError, ServiceError},
     models::{AuthenticatedUser, NewUser, User},
     pagination::{Paginate, PaginatedResults},
     schema::users,
@@ -115,7 +115,7 @@ pub struct InputUser {
     pub password: String,
 }
 
-pub fn create_user(conn: &mut PooledConn, user: InputUser) -> Result<User, DbError> {
+pub fn create_user(conn: &mut PooledConn, user: InputUser) -> Result<User, ServiceError> {
     use crate::schema::users::dsl::users;
 
     let hash = &hash_password(&user.password)?;
