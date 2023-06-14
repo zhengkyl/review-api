@@ -11,10 +11,29 @@ use diesel::{associations::HasTable, prelude::*};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
+pub enum SortBy {
+    #[serde(rename = "id.asc")]
+    IdAsc,
+    #[serde(rename = "id.desc")]
+    IdDesc,
+    #[serde(rename = "name.asc")]
+    NameAsc,
+    #[serde(rename = "name.desc")]
+    NameDesc,
+    #[serde(rename = "created_at.asc")]
+    CreatedAtAsc,
+    #[serde(rename = "created_at.desc")]
+    CreatedAtDesc,
+    #[serde(rename = "updated_at.asc")]
+    UpdatedAtAsc,
+    #[serde(rename = "updated_at.desc")]
+    UpdatedAtDesc,
+}
+#[derive(Deserialize)]
 pub struct QueryParams {
     pub page: Option<i64>,
     pub per_page: Option<i64>,
-    pub sort_by: Option<String>,
+    pub sort_by: Option<SortBy>,
 }
 
 pub fn get_all_users(
@@ -26,17 +45,18 @@ pub fn get_all_users(
     let mut query = users::table().into_boxed();
 
     if let Some(sort_by) = params.sort_by {
-        query = match sort_by.as_ref() {
-            "id.asc" => query.order(id.asc()),
-            "id.desc" => query.order(id.desc()),
-            "name.asc" => query.order(name.asc()),
-            "name.desc" => query.order(name.desc()),
-            "created_at.asc" => query.order(created_at.asc()),
-            "created_at.desc" => query.order(created_at.desc()),
-            "updated_at.asc" => query.order(updated_at.asc()),
-            "updated_at.desc" => query.order(updated_at.desc()),
-            _ => query.order(id.asc()),
+        query = match sort_by {
+            SortBy::IdAsc => query.order(id.asc()),
+            SortBy::IdDesc => query.order(id.desc()),
+            SortBy::NameAsc => query.order(name.asc()),
+            SortBy::NameDesc => query.order(name.desc()),
+            SortBy::CreatedAtAsc => query.order(created_at.asc()),
+            SortBy::CreatedAtDesc => query.order(created_at.desc()),
+            SortBy::UpdatedAtAsc => query.order(updated_at.asc()),
+            SortBy::UpdatedAtDesc => query.order(updated_at.desc()),
         }
+    } else {
+        query = query.order(id.asc())
     }
 
     let results = query

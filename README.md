@@ -4,7 +4,7 @@ an attempt to learn how to use rust for a web server
 
 Check `src/main.rs` for all API endpoints.
 
-There is no frontend.
+See [`review-ssh`](http://github.com/zhengkyl/review-ssh) for a terminal user interface.
 
 ## Endpoints
 
@@ -26,7 +26,7 @@ curl --location --request GET 'https://review-api.fly.dev/auth' \
 
 <details>
 <summary>
-<h2><code>/auth</code></h2>
+<h2>/auth</h2>
 </summary>
 
 ### `GET /auth`
@@ -40,14 +40,16 @@ Check current user. This shows the `email` field.
   "id": 1,
   "name": "Kyle",
   "email": "kyle@zheng.com",
-  "created_at": "2022-11-30T17:05:36.313355",
-  "updated_at": "2022-11-30T17:05:36.313355"
+  "created_at": "2022-11-30T17:05:36.313355Z",
+  "updated_at": "2022-11-30T17:05:36.313355Z"
 }
 ```
 
 ### `DELETE /auth`
 
 This logs out the user.
+
+204 OK
 
 ### `POST /auth`
 
@@ -73,8 +75,8 @@ This logs in the user.
   "id": 1,
   "name": "Kyle Zheng",
   "email": "kyle@zheng.com",
-  "created_at": "2022-11-30T20:03:35.554592",
-  "updated_at": "2022-11-30T20:03:35.554592"
+  "created_at": "2022-11-30T20:03:35.554592Z",
+  "updated_at": "2022-11-30T20:03:35.554592Z"
 }
 ```
 
@@ -82,7 +84,7 @@ This logs in the user.
 
 <details>
 <summary>
-<h2><code>/users</code></h2>
+<h2>/users</h2>
 </summary>
 
 ### `GET /users`
@@ -103,14 +105,14 @@ This logs in the user.
     {
       "id": 1,
       "name": "Kyle",
-      "created_at": "2022-11-30T17:05:36.313355",
-      "updated_at": "2022-11-30T17:05:36.313355"
+      "created_at": "2022-11-30T17:05:36.313355Z",
+      "updated_at": "2022-11-30T17:05:36.313355Z"
     },
     {
       "id": 3,
       "name": "Loid",
-      "created_at": "2022-11-30T17:13:11.250255",
-      "updated_at": "2022-11-30T17:27:53.894057"
+      "created_at": "2022-11-30T17:13:11.250255Z",
+      "updated_at": "2022-11-30T17:27:53.894057Z"
     }
   ],
   "page": 1,
@@ -127,8 +129,8 @@ This logs in the user.
 {
   "id": 1,
   "name": "Kyle",
-  "created_at": "2022-11-30T17:05:36.313355",
-  "updated_at": "2022-11-30T17:05:36.313355"
+  "created_at": "2022-11-30T17:05:36.313355Z",
+  "updated_at": "2022-11-30T17:05:36.313355Z"
 }
 ```
 
@@ -152,8 +154,8 @@ This creates a new user.
 {
   "id": 3,
   "name": "Twilight",
-  "created_at": "2022-11-30T17:13:11.250255",
-  "updated_at": "2022-11-30T17:13:11.250255"
+  "created_at": "2022-11-30T17:13:11.250255Z",
+  "updated_at": "2022-11-30T17:13:11.250255Z"
 }
 ```
 
@@ -179,8 +181,8 @@ This shows the `email` field, because the route is authenticated.
   "id": 3,
   "name": "Loid",
   "email": "loid@forger.com",
-  "created_at": "2022-11-30T17:13:11.250255",
-  "updated_at": "2022-11-30T17:27:53.894057"
+  "created_at": "2022-11-30T17:13:11.250255Z",
+  "updated_at": "2022-11-30T17:27:53.894057Z"
 }
 ```
 
@@ -198,7 +200,7 @@ This shows the `email` field, because the route is authenticated.
 
 <details>
 <summary>
-<h2><code>/search</code></h2>
+<h2>/search</h2>
 </summary>
 
 ### `GET /search/{category}?query=`
@@ -244,24 +246,24 @@ https://developers.themoviedb.org/3/search/search-tv-shows
 
 <details>
 <summary>
-<h2><code>/reviews</code></h2>
+<h2>/reviews</h2>
 </summary>
 
 ### `GET /reviews`
 
 #### Query params
 
-| Param      | Type                                                                                                      | Default |
-| ---------- | --------------------------------------------------------------------------------------------------------- | ------- |
-| page       | 0 < integer                                                                                               | 1       |
-| per_page   | 0 < integer < 51                                                                                          | 10      |
-| sort_by    | `FIELD.ORDER`<br> FIELD is one of `tmdb_id`, `created_at`, `updated_at`<br> ORDER is one of `asc`, `desc` | id.asc  |
-| user_id    | user id                                                                                                   | n/a     |
-| category   | `Film` \| `Show`                                                                                          | n/a     |
-| status     | `Completed` \| `Watching` \| `Dropped` \| `PlanToWatch`                                                   | n/a     |
-| fun_before | bool                                                                                                      | n/a     |
-| fun_during | bool                                                                                                      | n/a     |
-| fun_after  | bool                                                                                                      | n/a     |
+| Param      | Type                                                                                                      | Default         |
+| ---------- | --------------------------------------------------------------------------------------------------------- | --------------- |
+| page       | 0 < integer                                                                                               | 1               |
+| per_page   | 0 < integer < 51                                                                                          | 10              |
+| sort_by    | `FIELD.ORDER`<br> FIELD is one of `tmdb_id`, `created_at`, `updated_at`<br> ORDER is one of `asc`, `desc` | updated_at.desc |
+| user_id    | user id                                                                                                   | n/a             |
+| category   | `Film` \| `Show`                                                                                          | n/a             |
+| status     | `Completed` \| `Watching` \| `Dropped` \| `PlanToWatch`                                                   | n/a             |
+| fun_before | bool                                                                                                      | n/a             |
+| fun_during | bool                                                                                                      | n/a             |
+| fun_after  | bool                                                                                                      | n/a             |
 
 #### Response body
 
@@ -277,8 +279,8 @@ https://developers.themoviedb.org/3/search/search-tv-shows
       "fun_before": true,
       "fun_during": true,
       "fun_after": true,
-      "created_at": "2022-11-30T18:09:58.829342",
-      "updated_at": "2022-11-30T18:18:00.720356"
+      "created_at": "2022-11-30T18:09:58.829342Z",
+      "updated_at": "2022-11-30T18:18:00.720356Z"
     }
   ],
   "page": 1,
@@ -318,8 +320,8 @@ or
   "fun_before": false,
   "fun_during": false,
   "fun_after": false,
-  "created_at": "2022-11-30T18:09:58.829342",
-  "updated_at": "2022-11-30T18:09:58.829342"
+  "created_at": "2022-11-30T18:09:58.829342Z",
+  "updated_at": "2022-11-30T18:09:58.829342Z"
 }
 ```
 
@@ -353,8 +355,8 @@ All fields are optional.
   "fun_before": true,
   "fun_during": true,
   "fun_after": true,
-  "created_at": "2022-11-30T18:09:58.829342",
-  "updated_at": "2022-11-30T18:18:00.720356"
+  "created_at": "2022-11-30T18:09:58.829342Z",
+  "updated_at": "2022-11-30T18:18:00.720356Z"
 }
 ```
 

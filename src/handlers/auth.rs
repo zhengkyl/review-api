@@ -51,7 +51,7 @@ impl FromRequest for UserId {
 #[delete("")]
 pub async fn logout(id: Identity) -> impl Responder {
     id.logout();
-    HttpResponse::Ok()
+    HttpResponse::NoContent()
 }
 
 #[post("")]

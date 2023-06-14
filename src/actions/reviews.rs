@@ -9,10 +9,26 @@ use crate::{
 };
 
 #[derive(Deserialize)]
+pub enum SortBy {
+    #[serde(rename = "tmdb_id.asc")]
+    TmdbIdAsc,
+    #[serde(rename = "tmdb_id.desc")]
+    TmdbIdDesc,
+    #[serde(rename = "created_at.asc")]
+    CreatedAtAsc,
+    #[serde(rename = "created_at.desc")]
+    CreatedAtDesc,
+    #[serde(rename = "updated_at.asc")]
+    UpdatedAtAsc,
+    #[serde(rename = "updated_at.desc")]
+    UpdatedAtDesc,
+}
+
+#[derive(Deserialize)]
 pub struct ReviewsQuery {
     pub page: Option<i64>,
     pub per_page: Option<i64>,
-    pub sort_by: Option<String>,
+    pub sort_by: Option<SortBy>,
     pub user_id: Option<i32>,
     pub category: Option<MediaCategory>,
     pub status: Option<WatchStatus>,
@@ -49,15 +65,16 @@ pub fn get_all_reviews(
     }
 
     if let Some(sort_by) = params.sort_by {
-        query = match sort_by.as_ref() {
-            "tmdb_id.asc" => query.order(tmdb_id.asc()),
-            "tmdb_id.desc" => query.order(tmdb_id.desc()),
-            "created_at.asc" => query.order(created_at.asc()),
-            "created_at.desc" => query.order(created_at.desc()),
-            "updated_at.asc" => query.order(updated_at.asc()),
-            "updated_at.desc" => query.order(updated_at.desc()),
-            _ => query.order(tmdb_id.asc()),
+        query = match sort_by {
+            SortBy::TmdbIdAsc => query.order(tmdb_id.asc()),
+            SortBy::TmdbIdDesc => query.order(tmdb_id.desc()),
+            SortBy::CreatedAtAsc => query.order(created_at.asc()),
+            SortBy::CreatedAtDesc => query.order(created_at.desc()),
+            SortBy::UpdatedAtAsc => query.order(updated_at.asc()),
+            SortBy::UpdatedAtDesc => query.order(updated_at.desc()),
         }
+    } else {
+        query = query.order(updated_at.desc())
     }
 
     let results = query
