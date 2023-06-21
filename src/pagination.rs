@@ -39,7 +39,7 @@ impl<T> Paginate for T {
         };
 
         let per_page = match per_page {
-            Some(per_page) if per_page > 0 && per_page < MAX_PER_PAGE => per_page,
+            Some(per_page) if per_page > 0 && per_page <= MAX_PER_PAGE => per_page,
             _ => DEFAULT_PER_PAGE,
         };
 

@@ -41,6 +41,7 @@ pub async fn post_reviews(
     Ok(HttpResponse::Ok().json(review))
 }
 
+// Both defined in main.rs, macro doesn't allow multiple
 // #[put("/{category}/{id}/{season}")]
 // #[put("/{category}/{id}")]
 pub async fn put_reviews(
@@ -79,6 +80,7 @@ pub async fn put_reviews(
     Ok(HttpResponse::Ok().json(review))
 }
 
+// Both defined in main.rs, macro doesn't allow multiple
 // #[delete("/{category}/{id}/{season}")]
 // #[delete("/{category}/{id}")]
 pub async fn delete_reviews(

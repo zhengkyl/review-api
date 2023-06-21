@@ -31,6 +31,8 @@ pub struct ReviewsQuery {
     pub sort_by: Option<SortBy>,
     pub user_id: Option<i32>,
     pub category: Option<MediaCategory>,
+    pub tmdb_id: Option<i32>,
+    pub season: Option<i32>,
     pub status: Option<WatchStatus>,
     pub fun_before: Option<bool>,
     pub fun_during: Option<bool>,
@@ -50,6 +52,12 @@ pub fn get_all_reviews(
     }
     if let Some(category_in) = params.category {
         query = query.filter(category.eq(category_in));
+    }
+    if let Some(tmdb_id_in) = params.tmdb_id {
+        query = query.filter(tmdb_id.eq(tmdb_id_in));
+    }
+    if let Some(season_in) = params.season {
+        query = query.filter(season.eq(season_in))
     }
     if let Some(status_in) = params.status {
         query = query.filter(status.eq(status_in));

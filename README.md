@@ -260,6 +260,8 @@ https://developers.themoviedb.org/3/search/search-tv-shows
 | sort_by    | `FIELD.ORDER`<br> FIELD is one of `tmdb_id`, `created_at`, `updated_at`<br> ORDER is one of `asc`, `desc` | updated_at.desc |
 | user_id    | user id                                                                                                   | n/a             |
 | category   | `Film` \| `Show`                                                                                          | n/a             |
+| tmdb_id    | tmdb_id integer                                                                                           | n/a             |
+| season     | season integer                                                                                            | n/a             |
 | status     | `Completed` \| `Watching` \| `Dropped` \| `PlanToWatch`                                                   | n/a             |
 | fun_before | bool                                                                                                      | n/a             |
 | fun_during | bool                                                                                                      | n/a             |
