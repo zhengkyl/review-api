@@ -76,7 +76,7 @@ async fn main() -> std::io::Result<()> {
                     .service(users::get_users)
                     .service(users::get_users_id)
                     .service(users::delete_users_id)
-                    .service(users::put_users_id)
+                    .service(users::patch_users_id)
                     .service(users::post_users),
             )
             .service(
@@ -90,7 +90,7 @@ async fn main() -> std::io::Result<()> {
                     .service(reviews::post_reviews)
                     .service(
                         web::resource(["/{category}/{id}/{season}", "/{category}/{id}"])
-                            .route(web::put().to(reviews::put_reviews))
+                            .route(web::patch().to(reviews::patch_reviews))
                             .route(web::delete().to(reviews::delete_reviews)),
                     ),
             )

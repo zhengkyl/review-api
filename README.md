@@ -159,7 +159,7 @@ This creates a new user.
 }
 ```
 
-### `PUT /users/{id}`
+### `PATCH /users/{id}`
 
 #### Request body
 
@@ -327,9 +327,9 @@ or
 }
 ```
 
-### `PUT /reviews/{category}/{tmdb_id}`
+### `PATCH /reviews/{category}/{tmdb_id}`
 
-### `PUT /reviews/{category}/{tmdb_id}/{season}`
+### `PATCH /reviews/{category}/{tmdb_id}/{season}`
 
 #### Request body
 

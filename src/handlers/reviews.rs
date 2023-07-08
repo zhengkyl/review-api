@@ -42,9 +42,9 @@ pub async fn post_reviews(
 }
 
 // Both defined in main.rs, macro doesn't allow multiple
-// #[put("/{category}/{id}/{season}")]
-// #[put("/{category}/{id}")]
-pub async fn put_reviews(
+// #[patch("/{category}/{id}/{season}")]
+// #[patch("/{category}/{id}")]
+pub async fn patch_reviews(
     req: HttpRequest,
     pool: web::Data<Pool>,
     user_id: UserId,

@@ -7,7 +7,7 @@ use crate::handlers::auth::UserId;
 use crate::errors::ServiceError;
 use crate::Pool;
 
-use actix_web::{delete, get, post, put, web, HttpResponse};
+use actix_web::{delete, get, patch, post, web, HttpResponse};
 use serde_json::json;
 
 #[get("")]
@@ -42,8 +42,8 @@ pub async fn get_users_id(
     Ok(HttpResponse::Ok().json(user))
 }
 
-#[put("{id}")]
-pub async fn put_users_id(
+#[patch("{id}")]
+pub async fn patch_users_id(
     pool: web::Data<Pool>,
     path_id: web::Path<i32>,
     user_id: UserId,
